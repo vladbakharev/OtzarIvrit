@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Otzar Ivrit</string>
+    <string name="fab_add">Add</string>
 </resources>
