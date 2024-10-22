@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -19,7 +20,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
@@ -33,6 +36,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.vladbakharev.otzarivrit.navigation.NavigationStack
+import com.vladbakharev.otzarivrit.navigation.Screen
 import com.vladbakharev.otzarivrit.ui.theme.OtzarIvritTheme
 
 class MainActivity : ComponentActivity() {
@@ -41,7 +47,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             OtzarIvritTheme {
-
+                NavigationStack()
             }
         }
     }
@@ -49,7 +55,10 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OtzarIvritApp(modifier: Modifier = Modifier) {
+fun OtzarIvritApp(
+    modifier: Modifier = Modifier,
+    navController: NavController
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -65,7 +74,9 @@ fun OtzarIvritApp(modifier: Modifier = Modifier) {
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = {}) {
+            FloatingActionButton(
+                onClick = { navController.navigate(route = Screen.Add.route) }
+            ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.fab_add))
             }
         }
@@ -73,7 +84,7 @@ fun OtzarIvritApp(modifier: Modifier = Modifier) {
         Column(
             modifier = Modifier.padding(innerPadding)
         ) {
-
+            OtzarIvritCard()
 
         }
     }
@@ -83,7 +94,8 @@ fun OtzarIvritApp(modifier: Modifier = Modifier) {
 fun OtzarIvritCard(modifier: Modifier = Modifier) {
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .padding(16.dp),
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
@@ -126,75 +138,80 @@ fun OtzarIvritCard(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun OtzarIvritAddWord(modifier: Modifier = Modifier) {
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
+fun OtzarIvritAddWord(
+    modifier: Modifier = Modifier,
+    navController: NavController
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
-        Text(
+        Column(
             modifier = Modifier
-                .padding(start = 16.dp),
-            text = "Word",
-            style = MaterialTheme.typography.titleLarge,
-        )
-        TextField(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            value = "",
-            onValueChange = {},
-            label = { Text("Word") }
-        )
-        Text(
-            modifier = Modifier
-                .padding(start = 16.dp),
-            text = "Translation",
-            style = MaterialTheme.typography.titleLarge,
-        )
-        TextField(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            value = "",
-            onValueChange = {},
-            label = { Text("Translation") }
-        )
-        Text(
-            modifier = Modifier
-                .padding(start = 16.dp),
-            text = "Transcription",
-            style = MaterialTheme.typography.titleLarge,
-        )
-        TextField(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            value = "",
-            onValueChange = {},
-            label = { Text("Transcription") }
-        )
-        Button(
-            modifier = Modifier
-                .padding(16.dp)
-                .align(Alignment.End),
-            onClick = {},
-
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                modifier = Modifier
+                    .padding(start = 16.dp),
+                text = "Word",
+                style = MaterialTheme.typography.titleLarge,
+            )
+            TextField(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                value = "",
+                onValueChange = {},
+                label = { Text("Word") }
+            )
+            Text(
+                modifier = Modifier
+                    .padding(start = 16.dp),
+                text = "Translation",
+                style = MaterialTheme.typography.titleLarge,
+            )
+            TextField(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                value = "",
+                onValueChange = {},
+                label = { Text("Translation") }
+            )
+            Text(
+                modifier = Modifier
+                    .padding(start = 16.dp),
+                text = "Transcription",
+                style = MaterialTheme.typography.titleLarge,
+            )
+            TextField(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                value = "",
+                onValueChange = {},
+                label = { Text("Transcription") }
+            )
+            Button(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .align(Alignment.End),
+                onClick = { navController.navigate(route = Screen.Main.route) },
             ) {
-            Text("Add")
+                Text("Add")
+            }
         }
-
     }
 }
 
-
+//PREVIEWS
 @Preview(showBackground = true)
 @Composable
 fun OtzarIvritAddWordPreview() {
     OtzarIvritTheme {
-        OtzarIvritAddWord()
+        OtzarIvritAddWord(navController = NavController(MainActivity()))
     }
 }
 
@@ -211,7 +228,6 @@ fun OtzarIvritCardPreview() {
 @Composable
 fun GreetingPreview() {
     OtzarIvritTheme {
-        OtzarIvritApp(modifier = Modifier)
-
+        OtzarIvritApp(navController = NavController(MainActivity()))
     }
 }
