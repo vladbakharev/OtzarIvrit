@@ -13,7 +13,7 @@ fun NavigationStack() {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Main.route,
+        startDestination = NavBar.Home.route,
     ) {
         composable(route = Screen.Main.route) {
             OtzarIvritApp(navController = navController)
@@ -21,6 +21,7 @@ fun NavigationStack() {
         composable(route = Screen.Add.route) {
             OtzarIvritAddWord(navController = navController)
         }
+
     }
 
 }

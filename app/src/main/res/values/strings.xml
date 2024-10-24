@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Otzar Ivrit</string>
     <string name="fab_add">Add</string>
+
+<!--labels-->
+    <string name="label_home">Home</string>
+    <string name="label_collections">Collections</string>
+    <string name="label_settings">Settings</string>
 </resources>
