@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -21,6 +20,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -28,7 +28,11 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -39,9 +43,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.vladbakharev.otzarivrit.navigation.NavBar
 import com.vladbakharev.otzarivrit.navigation.NavigationStack
 import com.vladbakharev.otzarivrit.navigation.Screen
 import com.vladbakharev.otzarivrit.ui.theme.OtzarIvritTheme
+import kotlinx.coroutines.flow.map
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,7 +55,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             OtzarIvritTheme {
-                NavigationStack()
+//                NavigationStack()
             }
         }
     }
@@ -77,7 +83,7 @@ fun OtzarIvritApp(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navController.navigate(route = Screen.Add.route) }
+                onClick = { navController.navigate(route = Screen.AddWord) }
             ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.fab_add))
             }
@@ -87,25 +93,7 @@ fun OtzarIvritApp(
             modifier = Modifier.padding(innerPadding)
         ) {
             OtzarIvritCard()
-           /* BottomNavigation {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentRoute = navBackStackEntry?.destination?.route
-
-                BottomNavItem.values().forEach { item ->
-                    BottomNavigationItem(
-                        selected = currentRoute == item.route,
-                        onClick = {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.startDestinationId)
-                                launchSingleTop = true
-                            }
-                        },
-                        icon = { Icon(item.icon, contentDescription = null) },
-                        label = { Text(item.label) }
-                    )
-                }
-            }*/
-
+            NavigationBar(navController)
         }
     }
 }
@@ -218,12 +206,57 @@ fun OtzarIvritAddWord(
                 modifier = Modifier
                     .padding(16.dp)
                     .align(Alignment.End),
-                onClick = { navController.navigate(route = Screen.Main.route) },
+                onClick = { navController.navigate(route = Screen.Home) },
             ) {
                 Text("Add")
             }
         }
     }
+}
+
+@Composable
+fun NavigationBar(navController: NavController) {
+    val currentRoute = navController.currentBackStackEntryFlow.map { backStackEntry ->
+        backStackEntry.destination.route
+    }.collectAsState(initial = Screen.Home.route)
+
+    val items = listOf(
+        NavBar.Home,
+        NavBar.Collections,
+        NavBar.Settings
+    )
+
+    var selectedItem by remember { mutableIntStateOf(0) }
+
+    items.forEachIndexed { index, navigationItem ->
+        if (navigationItem.rootRoute.route == currentRoute.value) {
+            selectedItem = index
+        }
+    }
+
+    NavigationBar {
+        items.forEachIndexed { index, item ->
+            NavigationBarItem(
+                alwaysShowLabel = true,
+                icon = { Icon(item.icon, contentDescription = item.title) },
+                label = { Text(item.title) },
+                selected = selectedItem == index,
+                onClick = {
+                    selectedItem = index
+                    navController.navigate(item.rootRoute.route) {
+                        navController.graph.startDestinationRoute?.let { route ->
+                            popUpTo(route) {
+                                saveState = true
+                            }
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
+    }
+
 }
 
 //PREVIEWS
