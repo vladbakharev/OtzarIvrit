@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -23,6 +24,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
@@ -35,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -42,7 +45,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.vladbakharev.otzarivrit.navigation.NavBar
 import com.vladbakharev.otzarivrit.navigation.NavigationStack
 import com.vladbakharev.otzarivrit.navigation.Screen
@@ -55,7 +57,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             OtzarIvritTheme {
-//                NavigationStack()
+                NavigationStack(navController = NavController(this))
             }
         }
     }
@@ -65,7 +67,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun OtzarIvritApp(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    title: String,
+    onNavigateToNextScreenClicked: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -83,17 +87,19 @@ fun OtzarIvritApp(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navController.navigate(route = Screen.AddWord) }
+                onClick = { navController.navigate(route = Screen.AddWord.route) }
             ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.fab_add))
             }
+        },
+        bottomBar = {
+            NavigationBar(navController)
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier.padding(innerPadding)
         ) {
             OtzarIvritCard()
-            NavigationBar(navController)
         }
     }
 }
@@ -146,7 +152,7 @@ fun OtzarIvritCard(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun OtzarIvritAddWord(
+fun AddWord(
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
@@ -206,9 +212,91 @@ fun OtzarIvritAddWord(
                 modifier = Modifier
                     .padding(16.dp)
                     .align(Alignment.End),
-                onClick = { navController.navigate(route = Screen.Home) },
+                onClick = { navController.navigate(route = Screen.HomeRoot.route) },
             ) {
                 Text("Add")
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingsScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    title: String,
+    onNavigateToNextScreenClicked: () -> Unit
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        stringResource(R.string.label_settings)
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary
+                )
+            )
+        },
+        bottomBar = {
+            NavigationBar(navController)
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            Row (
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    painter = painterResource(R.drawable.baseline_dark_mode_24),
+                    contentDescription = stringResource(R.string.dark_theme)
+                )
+                Text(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    text = stringResource(R.string.dark_theme),
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Switch(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    checked = false,
+                    onCheckedChange = {}
+
+                )
+            }
+            Row (
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    imageVector = Icons.Default.Info,
+                    contentDescription = stringResource(R.string.about)
+                )
+                Text(
+                    modifier = Modifier
+                        .padding(16.dp),
+                    textAlign = TextAlign.Start,
+                    text = stringResource(R.string.about),
+                    style = MaterialTheme.typography.titleLarge
+                )
+
             }
         }
     }
@@ -218,7 +306,7 @@ fun OtzarIvritAddWord(
 fun NavigationBar(navController: NavController) {
     val currentRoute = navController.currentBackStackEntryFlow.map { backStackEntry ->
         backStackEntry.destination.route
-    }.collectAsState(initial = Screen.Home.route)
+    }.collectAsState(initial = Screen.HomeRoot.route)
 
     val items = listOf(
         NavBar.Home,
@@ -256,15 +344,14 @@ fun NavigationBar(navController: NavController) {
             )
         }
     }
-
 }
 
 //PREVIEWS
 @Preview(showBackground = true)
 @Composable
-fun OtzarIvritAddWordPreview() {
+fun AddWordPreview() {
     OtzarIvritTheme {
-        OtzarIvritAddWord(navController = NavController(MainActivity()))
+        AddWord(navController = NavController(MainActivity()))
     }
 }
 
@@ -279,8 +366,20 @@ fun OtzarIvritCardPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun OtzarIvritAppPreview() {
     OtzarIvritTheme {
-        OtzarIvritApp(navController = NavController(MainActivity()))
+        NavigationStack(navController = NavController(MainActivity()))
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SettingsScreenPreview() {
+    OtzarIvritTheme {
+        SettingsScreen(
+            navController = NavController(MainActivity()),
+            title = stringResource(R.string.label_settings),
+            onNavigateToNextScreenClicked = {})
+    }
+
 }
