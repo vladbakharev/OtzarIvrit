@@ -1,16 +1,16 @@
 package com.vladbakharev.otzarivrit.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.vladbakharev.otzarivrit.AddWord
-import com.vladbakharev.otzarivrit.OtzarIvritApp
+import com.vladbakharev.otzarivrit.CollectionsScreen
+import com.vladbakharev.otzarivrit.HomeScreen
 import com.vladbakharev.otzarivrit.SettingsScreen
 
 @Composable
-fun NavigationStack(navController: NavController) {
+fun NavigationStack() {
     val navController = rememberNavController()
 
     val navigateToNextScreen: (String) -> Unit = { destinationRoute ->
@@ -21,7 +21,7 @@ fun NavigationStack(navController: NavController) {
     }
     NavHost(navController = navController, startDestination = Screen.HomeRoot.route) {
         composable(route = Screen.HomeRoot.route) {
-            OtzarIvritApp(
+            HomeScreen(
                 navController = navController,
                 title = Screen.HomeRoot.title,
                 onNavigateToNextScreenClicked = { navigateToNextScreen(Screen.HomeChild.route) }
@@ -29,10 +29,25 @@ fun NavigationStack(navController: NavController) {
         }
         composable(Screen.HomeChild.route) { backStackEntry ->
             val screenNum = backStackEntry.arguments?.getString("num") ?: "0"
-            OtzarIvritApp(
+            HomeScreen(
                 navController = navController,
                 title = "${Screen.HomeChild.title} $screenNum",
                 onNavigateToNextScreenClicked = { navigateToNextScreen(Screen.HomeChild.route) }
+            )
+        }
+        composable(Screen.CollectionsRoot.route) {
+            CollectionsScreen(
+                navController = navController,
+                title = Screen.CollectionsRoot.title,
+                onNavigateToNextScreenClicked = { navigateToNextScreen(Screen.CollectionsChild.route) }
+            )
+        }
+        composable(Screen.CollectionsChild.route) { backStackEntry ->
+            val screenNum = backStackEntry.arguments?.getString("num") ?: "0"
+            CollectionsScreen(
+                navController = navController,
+                title = "${Screen.CollectionsChild.title} $screenNum",
+                onNavigateToNextScreenClicked = { navigateToNextScreen(Screen.CollectionsChild.route) }
             )
         }
         composable(Screen.SettingsRoot.route) {
@@ -44,7 +59,7 @@ fun NavigationStack(navController: NavController) {
         }
         composable(Screen.SettingsChild.route) { backStackEntry ->
             val screenNum = backStackEntry.arguments?.getString("num") ?: "0"
-            SettingsScreen (
+            SettingsScreen(
                 navController = navController,
                 title = "${Screen.SettingsChild.title} $screenNum",
                 onNavigateToNextScreenClicked = { navigateToNextScreen(Screen.SettingsChild.route) }

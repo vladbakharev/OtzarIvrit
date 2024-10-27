@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -44,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.vladbakharev.otzarivrit.navigation.NavBar
 import com.vladbakharev.otzarivrit.navigation.NavigationStack
@@ -57,7 +59,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             OtzarIvritTheme {
-                NavigationStack(navController = NavController(this))
+                NavigationStack()
             }
         }
     }
@@ -65,7 +67,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OtzarIvritApp(
+fun HomeScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     title: String,
@@ -97,7 +99,7 @@ fun OtzarIvritApp(
         }
     ) { innerPadding ->
         Column(
-            modifier = Modifier.padding(innerPadding)
+            modifier = modifier.padding(innerPadding)
         ) {
             OtzarIvritCard()
         }
@@ -105,42 +107,44 @@ fun OtzarIvritApp(
 }
 
 @Composable
-fun OtzarIvritCard(modifier: Modifier = Modifier) {
+fun OtzarIvritCard(
+    modifier: Modifier = Modifier
+) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(16.dp),
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Row(
-            modifier = Modifier
+            modifier = modifier
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {
             Column(
-                modifier = Modifier
+                modifier = modifier
                     .weight(0.5f)
             ) {
                 Text(
-                    modifier = Modifier,
+                    modifier = modifier,
                     text = "Transcription",
                     style = MaterialTheme.typography.titleSmall,
                 )
             }
             Column(
-                modifier = Modifier
+                modifier = modifier
                     .weight(0.5f),
             ) {
                 Text(
-                    modifier = Modifier
+                    modifier = modifier
                         .align(Alignment.End), text = "Word",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.End
                 )
                 Text(
-                    modifier = Modifier
+                    modifier = modifier
                         .align(Alignment.End),
                     text = "Translation",
                     fontStyle = FontStyle.Italic,
@@ -157,23 +161,23 @@ fun AddWord(
     navController: NavController
 ) {
     Surface(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .padding(16.dp),
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
-                modifier = Modifier
+                modifier = modifier
                     .padding(start = 16.dp),
                 text = "Word",
                 style = MaterialTheme.typography.titleLarge,
             )
             TextField(
-                modifier = Modifier
+                modifier = modifier
                     .padding(16.dp)
                     .fillMaxWidth(),
                 value = "",
@@ -181,13 +185,13 @@ fun AddWord(
                 label = { Text("Word") }
             )
             Text(
-                modifier = Modifier
+                modifier = modifier
                     .padding(start = 16.dp),
                 text = "Translation",
                 style = MaterialTheme.typography.titleLarge,
             )
             TextField(
-                modifier = Modifier
+                modifier = modifier
                     .padding(16.dp)
                     .fillMaxWidth(),
                 value = "",
@@ -195,13 +199,13 @@ fun AddWord(
                 label = { Text("Translation") }
             )
             Text(
-                modifier = Modifier
+                modifier = modifier
                     .padding(start = 16.dp),
                 text = "Transcription",
                 style = MaterialTheme.typography.titleLarge,
             )
             TextField(
-                modifier = Modifier
+                modifier = modifier
                     .padding(16.dp)
                     .fillMaxWidth(),
                 value = "",
@@ -209,13 +213,54 @@ fun AddWord(
                 label = { Text("Transcription") }
             )
             Button(
-                modifier = Modifier
+                modifier = modifier
                     .padding(16.dp)
                     .align(Alignment.End),
                 onClick = { navController.navigate(route = Screen.HomeRoot.route) },
             ) {
                 Text("Add")
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CollectionsScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    title: String,
+    onNavigateToNextScreenClicked: () -> Unit
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        stringResource(R.string.label_collections)
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary
+                )
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { navController.navigate(route = Screen.AddWord.route) }
+            ) {
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.fab_add))
+            }
+        },
+        bottomBar = {
+            NavigationBar(navController)
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = modifier.padding(innerPadding)
+        ) {
+            OtzarIvritCard()
         }
     }
 }
@@ -247,56 +292,56 @@ fun SettingsScreen(
         }
     ) { innerPadding ->
         Column(
-            modifier = Modifier.padding(innerPadding)
+            modifier = modifier.padding(innerPadding)
         ) {
-            Row (
-                modifier = Modifier
+            Row(
+                modifier = modifier
                     .padding(8.dp)
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start
             ) {
                 Icon(
-                    modifier = Modifier
+                    modifier = modifier
                         .padding(16.dp),
                     painter = painterResource(R.drawable.baseline_dark_mode_24),
                     contentDescription = stringResource(R.string.dark_theme)
                 )
                 Text(
-                    modifier = Modifier
+                    modifier = modifier
                         .padding(16.dp),
                     text = stringResource(R.string.dark_theme),
-                    style = MaterialTheme.typography.titleLarge
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Start
                 )
+                Spacer(modifier = modifier.weight(1f))
                 Switch(
-                    modifier = Modifier
+                    modifier = modifier
                         .padding(16.dp),
                     checked = false,
-                    onCheckedChange = {}
-
+                    onCheckedChange = {},
                 )
             }
-            Row (
-                modifier = Modifier
+            Row(
+                modifier = modifier
                     .padding(8.dp)
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start
             ) {
                 Icon(
-                    modifier = Modifier
+                    modifier = modifier
                         .padding(16.dp),
                     imageVector = Icons.Default.Info,
                     contentDescription = stringResource(R.string.about)
                 )
                 Text(
-                    modifier = Modifier
+                    modifier = modifier
                         .padding(16.dp),
                     textAlign = TextAlign.Start,
                     text = stringResource(R.string.about),
-                    style = MaterialTheme.typography.titleLarge
+                    fontSize = 18.sp
                 )
-
             }
         }
     }
@@ -349,6 +394,40 @@ fun NavigationBar(navController: NavController) {
 //PREVIEWS
 @Preview(showBackground = true)
 @Composable
+fun HomeScreenPreview() {
+    OtzarIvritTheme {
+        HomeScreen(
+            navController = NavController(MainActivity()),
+            title = stringResource(R.string.app_name),
+            onNavigateToNextScreenClicked = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CollectionsScreenPreview() {
+    OtzarIvritTheme {
+        CollectionsScreen(
+            navController = NavController(MainActivity()),
+            title = stringResource(R.string.label_collections),
+            onNavigateToNextScreenClicked = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SettingsScreenPreview() {
+    OtzarIvritTheme {
+        SettingsScreen(
+            navController = NavController(MainActivity()),
+            title = stringResource(R.string.label_settings),
+            onNavigateToNextScreenClicked = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
 fun AddWordPreview() {
     OtzarIvritTheme {
         AddWord(navController = NavController(MainActivity()))
@@ -364,22 +443,4 @@ fun OtzarIvritCardPreview() {
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun OtzarIvritAppPreview() {
-    OtzarIvritTheme {
-        NavigationStack(navController = NavController(MainActivity()))
-    }
-}
 
-@Preview(showBackground = true)
-@Composable
-fun SettingsScreenPreview() {
-    OtzarIvritTheme {
-        SettingsScreen(
-            navController = NavController(MainActivity()),
-            title = stringResource(R.string.label_settings),
-            onNavigateToNextScreenClicked = {})
-    }
-
-}
