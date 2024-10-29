@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
@@ -47,6 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.vladbakharev.otzarivrit.data.Word
 import com.vladbakharev.otzarivrit.navigation.NavBar
 import com.vladbakharev.otzarivrit.navigation.NavigationStack
 import com.vladbakharev.otzarivrit.navigation.Screen
@@ -101,14 +104,26 @@ fun HomeScreen(
         Column(
             modifier = modifier.padding(innerPadding)
         ) {
-            OtzarIvritCard()
+            OtzarIvritCard(modifier = modifier, word = Word(word = "Word", translation = "Translation", transcription = "Transcription"))
         }
     }
 }
 
 @Composable
+fun WordsList(words: List<Word>) {
+    LazyColumn {
+        items(words) { word ->
+            OtzarIvritCard(word = word)
+        }
+
+    }
+
+}
+
+@Composable
 fun OtzarIvritCard(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    word: Word
 ) {
     Card(
         modifier = modifier
@@ -182,7 +197,7 @@ fun AddWord(
                     .fillMaxWidth(),
                 value = "",
                 onValueChange = {},
-                label = { Text("Word") }
+                label = { Text(stringResource(R.string.word_label)) }
             )
             Text(
                 modifier = modifier
@@ -196,7 +211,7 @@ fun AddWord(
                     .fillMaxWidth(),
                 value = "",
                 onValueChange = {},
-                label = { Text("Translation") }
+                label = { Text(stringResource(R.string.translation_label)) }
             )
             Text(
                 modifier = modifier
@@ -210,7 +225,7 @@ fun AddWord(
                     .fillMaxWidth(),
                 value = "",
                 onValueChange = {},
-                label = { Text("Transcription") }
+                label = { Text(stringResource(R.string.transcription_label)) }
             )
             Button(
                 modifier = modifier
@@ -260,7 +275,7 @@ fun CollectionsScreen(
         Column(
             modifier = modifier.padding(innerPadding)
         ) {
-            OtzarIvritCard()
+
         }
     }
 }
@@ -399,7 +414,7 @@ fun HomeScreenPreview() {
         HomeScreen(
             navController = NavController(MainActivity()),
             title = stringResource(R.string.app_name),
-            onNavigateToNextScreenClicked = {}
+            onNavigateToNextScreenClicked = {},
         )
     }
 }
@@ -438,7 +453,13 @@ fun AddWordPreview() {
 @Composable
 fun OtzarIvritCardPreview() {
     OtzarIvritTheme {
-        OtzarIvritCard()
+        OtzarIvritCard(
+            word = Word(
+                word = "Word",
+                transcription = "Translation",
+                translation = "Transcription"
+            )
+        )
     }
 }
 

@@ -2,12 +2,18 @@
     <string name="app_name">Otzar Ivrit</string>
     <string name="fab_add">Add</string>
 
-<!--labels-->
+    <!--labels-->
     <string name="label_home">Home</string>
     <string name="label_collections">Collections</string>
     <string name="label_settings">Settings</string>
 
-<!--Settings-->
+    <!--Settings-->
     <string name="dark_theme">Dark theme</string>
     <string name="about">About</string>
+
+    <!--TextField labels-->
+    <string name="word_label">Word</string>
+    <string name="translation_label">Translation</string>
+    <string name="transcription_label">Transcription</string>
+
 </resources>
