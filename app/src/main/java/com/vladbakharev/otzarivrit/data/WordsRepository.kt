@@ -1,13 +1,9 @@
 package com.vladbakharev.otzarivrit.data
 
-import kotlinx.coroutines.flow.Flow
-
-interface WordsRepository {
-
-    suspend fun insertWord(word: Word)
-    suspend fun updateWord(word: Word)
-    suspend fun deleteWord(word: Word)
-    fun getWordStream(id: Int): Flow<Word?>
-    fun getAllWordsStream(): Flow<List<Word>>
-
+class WordsRepository(private val wordDao: WordDao) {
+    suspend fun insertWord(word: Word) = wordDao.insert(word)
+    suspend fun updateWord(word: Word) = wordDao.update(word)
+    suspend fun deleteWord(word: Word) = wordDao.delete(word)
+    fun getWordStream(id: Int) = wordDao.getWord(id)
+    fun getAllWordsStream() = wordDao.getAllWords()
 }

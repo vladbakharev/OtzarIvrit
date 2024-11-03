@@ -8,13 +8,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -22,6 +26,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -36,6 +41,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -48,12 +54,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.vladbakharev.otzarivrit.data.Word
 import com.vladbakharev.otzarivrit.navigation.NavBar
 import com.vladbakharev.otzarivrit.navigation.NavigationStack
 import com.vladbakharev.otzarivrit.navigation.Screen
 import com.vladbakharev.otzarivrit.ui.theme.OtzarIvritTheme
+import com.vladbakharev.otzarivrit.ui.viewmodel.OtzarIvritViewModel
 import kotlinx.coroutines.flow.map
 
 class MainActivity : ComponentActivity() {
@@ -74,8 +82,11 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     title: String,
-    onNavigateToNextScreenClicked: () -> Unit
+    onNavigateToNextScreenClicked: () -> Unit,
+    viewModel: OtzarIvritViewModel = viewModel(factory = OtzarIvritViewModel.Factory)
 ) {
+    val wordsList by viewModel.getAllWords().collectAsState(initial = emptyList())
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -87,12 +98,12 @@ fun HomeScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary
-                )
+                ),
             )
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navController.navigate(route = Screen.AddWord.route) }
+                onClick = { navController.navigate(route = Screen.AddWord.route) },
             ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.fab_add))
             }
@@ -104,66 +115,90 @@ fun HomeScreen(
         Column(
             modifier = modifier.padding(innerPadding)
         ) {
-            OtzarIvritCard(modifier = modifier, word = Word(word = "Word", translation = "Translation", transcription = "Transcription"))
+            WordsList(wordsList, modifier)
         }
     }
 }
 
 @Composable
-fun WordsList(words: List<Word>) {
-    LazyColumn {
+fun WordsList(words: List<Word>, modifier: Modifier) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize()
+    ) {
         items(words) { word ->
-            OtzarIvritCard(word = word)
+            WordCard(word = word)
         }
-
     }
-
 }
 
 @Composable
-fun OtzarIvritCard(
+fun WordCard(
     modifier: Modifier = Modifier,
     word: Word
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        shape = MaterialTheme.shapes.medium,
+            .padding(
+                start = 16.dp,
+                end = 16.dp,
+                top = 8.dp,
+                bottom = 8.dp
+            )
+            .height(120.dp),
+        shape = RoundedCornerShape(32.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Row(
             modifier = modifier
                 .padding(16.dp)
-                .fillMaxWidth()
+                .fillMaxSize()
         ) {
             Column(
                 modifier = modifier
                     .weight(0.5f)
-            ) {
-                Text(
-                    modifier = modifier,
-                    text = "Transcription",
-                    style = MaterialTheme.typography.titleSmall,
-                )
-            }
-            Column(
-                modifier = modifier
-                    .weight(0.5f),
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.Center
             ) {
                 Text(
                     modifier = modifier
-                        .align(Alignment.End), text = "Word",
+                        .align(Alignment.Start),
+                    text = word.transcription,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontStyle = FontStyle.Italic
+                )
+                Spacer(modifier = modifier.padding(16.dp))
+                IconToggleButton(
+                    modifier = modifier
+                        .align(Alignment.Start),
+                    checked = false,
+                    onCheckedChange = { }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.FavoriteBorder,
+                        contentDescription = stringResource(R.string.favourite)
+                    )
+                }
+            }
+            Column(
+                modifier = modifier
+                    .weight(0.5f)
+                    .fillMaxHeight()
+            ) {
+                Text(
+                    modifier = modifier
+                        .align(Alignment.End),
+                    text = word.word,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.End
                 )
+                Spacer(modifier = modifier.padding(18.dp))
                 Text(
                     modifier = modifier
                         .align(Alignment.End),
-                    text = "Translation",
-                    fontStyle = FontStyle.Italic,
-                    textAlign = TextAlign.End
+                    text = word.translation,
+                    textAlign = TextAlign.End,
                 )
             }
         }
@@ -173,8 +208,13 @@ fun OtzarIvritCard(
 @Composable
 fun AddWord(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    viewModel: OtzarIvritViewModel = viewModel(factory = OtzarIvritViewModel.Factory)
 ) {
+    var wordInput by remember { mutableStateOf("") }
+    var translationInput by remember { mutableStateOf("") }
+    var transcriptionInput by remember { mutableStateOf("") }
+
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -195,8 +235,8 @@ fun AddWord(
                 modifier = modifier
                     .padding(16.dp)
                     .fillMaxWidth(),
-                value = "",
-                onValueChange = {},
+                value = wordInput,
+                onValueChange = { wordInput = it },
                 label = { Text(stringResource(R.string.word_label)) }
             )
             Text(
@@ -209,8 +249,8 @@ fun AddWord(
                 modifier = modifier
                     .padding(16.dp)
                     .fillMaxWidth(),
-                value = "",
-                onValueChange = {},
+                value = translationInput,
+                onValueChange = { translationInput = it },
                 label = { Text(stringResource(R.string.translation_label)) }
             )
             Text(
@@ -223,15 +263,18 @@ fun AddWord(
                 modifier = modifier
                     .padding(16.dp)
                     .fillMaxWidth(),
-                value = "",
-                onValueChange = {},
+                value = transcriptionInput,
+                onValueChange = { transcriptionInput = it },
                 label = { Text(stringResource(R.string.transcription_label)) }
             )
             Button(
                 modifier = modifier
                     .padding(16.dp)
                     .align(Alignment.End),
-                onClick = { navController.navigate(route = Screen.HomeRoot.route) },
+                onClick = {
+                    viewModel.insertWord(wordInput, translationInput, transcriptionInput)
+                    navController.navigate(route = Screen.HomeRoot.route)
+                },
             ) {
                 Text("Add")
             }
@@ -334,7 +377,7 @@ fun SettingsScreen(
                     modifier = modifier
                         .padding(16.dp),
                     checked = false,
-                    onCheckedChange = {},
+                    onCheckedChange = { },
                 )
             }
             Row(
@@ -407,7 +450,7 @@ fun NavigationBar(navController: NavController) {
 }
 
 //PREVIEWS
-@Preview(showBackground = true)
+/*@Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
     OtzarIvritTheme {
@@ -417,7 +460,7 @@ fun HomeScreenPreview() {
             onNavigateToNextScreenClicked = {},
         )
     }
-}
+}*/
 
 @Preview(showBackground = true)
 @Composable
@@ -441,19 +484,19 @@ fun SettingsScreenPreview() {
     }
 }
 
-@Preview(showBackground = true)
+/*@Preview(showBackground = true)
 @Composable
 fun AddWordPreview() {
     OtzarIvritTheme {
         AddWord(navController = NavController(MainActivity()))
     }
-}
+}*/
 
 @Preview
 @Composable
-fun OtzarIvritCardPreview() {
+fun WordCardPreview() {
     OtzarIvritTheme {
-        OtzarIvritCard(
+        WordCard(
             word = Word(
                 word = "Word",
                 transcription = "Translation",

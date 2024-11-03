@@ -16,4 +16,7 @@
     <string name="translation_label">Translation</string>
     <string name="transcription_label">Transcription</string>
 
+    <!--Icons-->
+    <string name="favourite">Favourite</string>
+
 </resources>

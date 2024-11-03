@@ -24,6 +24,4 @@ interface WordDao {
 
     @Query("SELECT * FROM words ORDER BY word ASC")
     fun getAllWords(): Flow<List<Word>>
-
-
 }
