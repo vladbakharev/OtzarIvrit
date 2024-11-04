@@ -51,6 +51,8 @@ class OtzarIvritViewModel(private val wordsRepository: WordsRepository) : ViewMo
 
     fun getAllWords(): Flow<List<Word>> = wordsRepository.getAllWordsStream()
 
+    fun getAllWordsById(): Flow<List<Word>> = wordsRepository.getAllWordsById()
+
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {

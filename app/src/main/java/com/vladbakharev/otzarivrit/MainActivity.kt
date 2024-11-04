@@ -4,15 +4,16 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,9 +47,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -78,6 +79,35 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+fun TopAppBar(
+    modifier: Modifier = Modifier
+) {
+    TopAppBar(
+        title = {
+            Text(
+                stringResource(R.string.app_name)
+            )
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            titleContentColor = MaterialTheme.colorScheme.primary
+        ),
+        modifier = modifier.padding(bottom = 8.dp)
+    )
+}
+
+@Composable
+fun FloatingActionButton(
+    navController: NavController
+) {
+    FloatingActionButton(
+        onClick = { navController.navigate(route = Screen.AddWord.route) },
+    ) {
+        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.fab_add))
+    }
+}
+
+@Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
@@ -85,28 +115,14 @@ fun HomeScreen(
     onNavigateToNextScreenClicked: () -> Unit,
     viewModel: OtzarIvritViewModel = viewModel(factory = OtzarIvritViewModel.Factory)
 ) {
-    val wordsList by viewModel.getAllWords().collectAsState(initial = emptyList())
+    val wordsList by viewModel.getAllWordsById().collectAsState(initial = emptyList())
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        stringResource(R.string.app_name)
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary
-                ),
-            )
+            TopAppBar()
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navController.navigate(route = Screen.AddWord.route) },
-            ) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.fab_add))
-            }
+            FloatingActionButton(navController)
         },
         bottomBar = {
             NavigationBar(navController)
@@ -121,7 +137,10 @@ fun HomeScreen(
 }
 
 @Composable
-fun WordsList(words: List<Word>, modifier: Modifier) {
+fun WordsList(
+    words: List<Word>,
+    modifier: Modifier = Modifier
+) {
     LazyColumn(
         modifier = modifier.fillMaxSize()
     ) {
@@ -136,6 +155,7 @@ fun WordCard(
     modifier: Modifier = Modifier,
     word: Word
 ) {
+    val haptics = LocalHapticFeedback.current
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -145,7 +165,12 @@ fun WordCard(
                 top = 8.dp,
                 bottom = 8.dp
             )
-            .height(120.dp),
+            .height(120.dp)
+        /* .combinedClickable(
+             onLongClick = {
+                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+             }
+         )*/,
         shape = RoundedCornerShape(32.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
@@ -157,24 +182,24 @@ fun WordCard(
             Column(
                 modifier = modifier
                     .weight(0.5f)
-                    .fillMaxHeight(),
-                verticalArrangement = Arrangement.Center
+                    .fillMaxSize(),
             ) {
                 Text(
                     modifier = modifier
                         .align(Alignment.Start),
                     text = word.transcription,
                     style = MaterialTheme.typography.titleMedium,
-                    fontStyle = FontStyle.Italic
                 )
-                Spacer(modifier = modifier.padding(16.dp))
+                Spacer(modifier = modifier.padding(20.dp))
                 IconToggleButton(
                     modifier = modifier
-                        .align(Alignment.Start),
+                        .size(24.dp),
                     checked = false,
                     onCheckedChange = { }
                 ) {
                     Icon(
+                        modifier = modifier
+                            .fillMaxSize(),
                         imageVector = Icons.Default.FavoriteBorder,
                         contentDescription = stringResource(R.string.favourite)
                     )
@@ -183,7 +208,7 @@ fun WordCard(
             Column(
                 modifier = modifier
                     .weight(0.5f)
-                    .fillMaxHeight()
+                    .fillMaxSize()
             ) {
                 Text(
                     modifier = modifier
@@ -237,7 +262,8 @@ fun AddWord(
                     .fillMaxWidth(),
                 value = wordInput,
                 onValueChange = { wordInput = it },
-                label = { Text(stringResource(R.string.word_label)) }
+                label = { Text(stringResource(R.string.word_label)) },
+                singleLine = true
             )
             Text(
                 modifier = modifier
@@ -251,7 +277,8 @@ fun AddWord(
                     .fillMaxWidth(),
                 value = translationInput,
                 onValueChange = { translationInput = it },
-                label = { Text(stringResource(R.string.translation_label)) }
+                label = { Text(stringResource(R.string.translation_label)) },
+                singleLine = true
             )
             Text(
                 modifier = modifier
@@ -265,7 +292,8 @@ fun AddWord(
                     .fillMaxWidth(),
                 value = transcriptionInput,
                 onValueChange = { transcriptionInput = it },
-                label = { Text(stringResource(R.string.transcription_label)) }
+                label = { Text(stringResource(R.string.transcription_label)) },
+                singleLine = true
             )
             Button(
                 modifier = modifier
@@ -318,9 +346,36 @@ fun CollectionsScreen(
         Column(
             modifier = modifier.padding(innerPadding)
         ) {
-
+            FavouritesCard(modifier)
         }
     }
+}
+
+@Composable
+fun FavouritesCard(
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(
+                start = 16.dp,
+                end = 16.dp,
+                top = 8.dp,
+                bottom = 8.dp
+            )
+            .height(120.dp),
+        shape = RoundedCornerShape(32.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Row(
+            modifier = modifier.fillMaxSize()
+        ) {
+
+        }
+
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -450,17 +505,53 @@ fun NavigationBar(navController: NavController) {
 }
 
 //PREVIEWS
-/*@Preview(showBackground = true)
+
+@Preview(showBackground = true)
 @Composable
-fun HomeScreenPreview() {
+fun WordsListPreview() {
     OtzarIvritTheme {
-        HomeScreen(
-            navController = NavController(MainActivity()),
-            title = stringResource(R.string.app_name),
-            onNavigateToNextScreenClicked = {},
+        WordsList(
+            words = listOf(
+                Word(
+                    word = "בוקר",
+                    transcription = "Boker",
+                    translation = "Morning"
+                ),
+                Word(
+                    word = "טוב",
+                    transcription = "Tov",
+                    translation = "Good"
+                ),
+                Word(
+                    word = "אתה",
+                    transcription = "Atah",
+                    translation = "You"
+                ),
+                Word(
+                    word = "מורה",
+                    transcription = "Moreh",
+                    translation = "Teacher"
+                ),
+                Word(
+                    word = "תלמיד",
+                    transcription = "Tal'mid",
+                    translation = "Pupil"
+                ),
+                Word(
+                    word = "חייל",
+                    transcription = "Hayal",
+                    translation = "Soldier"
+                ),
+                Word(
+                    word = "מים",
+                    transcription = "Maim",
+                    translation = "Water"
+                )
+            ),
+            modifier = Modifier
         )
     }
-}*/
+}
 
 @Preview(showBackground = true)
 @Composable
@@ -475,6 +566,18 @@ fun CollectionsScreenPreview() {
 
 @Preview(showBackground = true)
 @Composable
+fun TopAppBarPreview() {
+    TopAppBar()
+}
+
+@Preview(showBackground = true)
+@Composable
+fun FloatingActionButtonPreview() {
+    FloatingActionButton(navController = NavController(MainActivity()))
+}
+
+@Preview(showBackground = true)
+@Composable
 fun SettingsScreenPreview() {
     OtzarIvritTheme {
         SettingsScreen(
@@ -483,14 +586,6 @@ fun SettingsScreenPreview() {
             onNavigateToNextScreenClicked = {})
     }
 }
-
-/*@Preview(showBackground = true)
-@Composable
-fun AddWordPreview() {
-    OtzarIvritTheme {
-        AddWord(navController = NavController(MainActivity()))
-    }
-}*/
 
 @Preview
 @Composable
@@ -503,6 +598,24 @@ fun WordCardPreview() {
                 translation = "Transcription"
             )
         )
+    }
+}
+
+@Preview
+@Composable
+fun FavouritesCardPreview() {
+    OtzarIvritTheme {
+        FavouritesCard(
+            modifier = Modifier
+        )
+    }
+}
+
+@Preview
+@Composable
+fun BottomNavigationBarPreview() {
+    OtzarIvritTheme {
+        NavigationBar(navController = NavController(MainActivity()))
     }
 }
 

@@ -6,4 +6,5 @@ class WordsRepository(private val wordDao: WordDao) {
     suspend fun deleteWord(word: Word) = wordDao.delete(word)
     fun getWordStream(id: Int) = wordDao.getWord(id)
     fun getAllWordsStream() = wordDao.getAllWords()
+    fun getAllWordsById() = wordDao.getAllWordsById()
 }
