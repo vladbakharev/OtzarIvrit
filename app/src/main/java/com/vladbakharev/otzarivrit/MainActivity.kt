@@ -4,11 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
@@ -156,6 +157,7 @@ fun WordCard(
     word: Word
 ) {
     val haptics = LocalHapticFeedback.current
+    var toggleButtonChecked by remember { mutableStateOf(false) }
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -166,11 +168,12 @@ fun WordCard(
                 bottom = 8.dp
             )
             .height(120.dp)
-        /* .combinedClickable(
-             onLongClick = {
-                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-             }
-         )*/,
+        /*.combinedClickable(
+            onLongClick = {
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+
+            }
+        )*/,
         shape = RoundedCornerShape(32.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
@@ -194,15 +197,24 @@ fun WordCard(
                 IconToggleButton(
                     modifier = modifier
                         .size(24.dp),
-                    checked = false,
-                    onCheckedChange = { }
+                    checked = toggleButtonChecked,
+                    onCheckedChange = { toggleButtonChecked = it }
                 ) {
-                    Icon(
-                        modifier = modifier
-                            .fillMaxSize(),
-                        imageVector = Icons.Default.FavoriteBorder,
-                        contentDescription = stringResource(R.string.favourite)
-                    )
+                    if (!toggleButtonChecked) {
+                        Icon(
+                            modifier = modifier
+                                .fillMaxSize(),
+                            imageVector = Icons.Default.FavoriteBorder,
+                            contentDescription = stringResource(R.string.favourite)
+                        )
+                    } else {
+                        Icon(
+                            modifier = modifier
+                                .fillMaxSize(),
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = stringResource(R.string.favourite)
+                        )
+                    }
                 }
             }
             Column(
@@ -369,8 +381,30 @@ fun FavouritesCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Row(
-            modifier = modifier.fillMaxSize()
+            modifier = modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+                .fillMaxHeight(),
+            horizontalArrangement = Arrangement.Center
         ) {
+            Icon(
+                imageVector = Icons.Default.Favorite,
+                contentDescription = stringResource(R.string.favourite),
+                modifier = modifier
+//                    .size(50.dp)
+                    .weight(0.3f)
+                    .fillMaxSize()
+            )
+            Text(
+                text = stringResource(R.string.favourite_card_title),
+                modifier = modifier
+                    .padding(16.dp)
+                    .align(Alignment.CenterVertically)
+                    .weight(0.7f),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
 
         }
 

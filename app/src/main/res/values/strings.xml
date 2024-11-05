@@ -19,4 +19,7 @@
     <!--Icons-->
     <string name="favourite">Favourite</string>
 
+    <!--Cards-->
+    <string name="favourite_card_title">Favourites</string>
+
 </resources>
