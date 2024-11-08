@@ -22,4 +22,7 @@
     <!--Cards-->
     <string name="favourite_card_title">Favourites</string>
 
+    <!--DropDownMenu-->
+    <string name="delete">Delete</string>
+
 </resources>
