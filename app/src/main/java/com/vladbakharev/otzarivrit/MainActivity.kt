@@ -18,18 +18,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
@@ -43,12 +42,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -64,6 +63,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -144,7 +144,7 @@ fun HomeScreen(
         Column(
             modifier = modifier.padding(innerPadding)
         ) {
-            WordsList(wordsList, modifier)
+            WordsList(words = wordsList, viewModel = viewModel)
         }
     }
 }
@@ -152,14 +152,15 @@ fun HomeScreen(
 @Composable
 fun WordsList(
     words: List<Word>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: OtzarIvritViewModel
 ) {
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
     ) {
         items(words) { word ->
-            WordCard(word = word)
+            WordCard(word = word, viewModel = viewModel)
         }
     }
 }
@@ -168,7 +169,8 @@ fun WordsList(
 @Composable
 fun WordCard(
     modifier: Modifier = Modifier,
-    word: Word
+    word: Word,
+    viewModel: OtzarIvritViewModel
 ) {
     var toggleButtonChecked by remember { mutableStateOf(false) }
     var isModalBottomSheetVisible by remember { mutableStateOf(false) }
@@ -257,8 +259,9 @@ fun WordCard(
     }
     if (isModalBottomSheetVisible) {
         CardModalBottomSheet(
-            modifier = modifier,
-            onDismissRequest = { isModalBottomSheetVisible = false }
+            onDismissRequest = { isModalBottomSheetVisible = false },
+            word = word,
+            viewModel = viewModel
         )
     }
 }
@@ -267,7 +270,9 @@ fun WordCard(
 @Composable
 fun CardModalBottomSheet(
     modifier: Modifier = Modifier,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
+    word: Word,
+    viewModel: OtzarIvritViewModel
 ) {
     val modalBottomSheetState = rememberModalBottomSheetState()
     var isDeleteDialogVisible by remember { mutableStateOf(false) }
@@ -288,7 +293,7 @@ fun CardModalBottomSheet(
                     modifier = modifier
                         .padding(16.dp),
                     imageVector = Icons.Default.Delete,
-                    contentDescription = null
+                    contentDescription = stringResource(R.string.delete)
                 )
                 Text(
                     modifier = modifier
@@ -303,18 +308,27 @@ fun CardModalBottomSheet(
         }
     }
     if (isDeleteDialogVisible) {
-        DeleteWordDialog()
+        DeleteWordDialog(
+            onDismissRequest = { isDeleteDialogVisible = false },
+            word = word,
+            viewModel = viewModel,
+            onDeleteConfirmed = { onDismissRequest() }
+        )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeleteWordDialog(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onDismissRequest: () -> Unit,
+    onDeleteConfirmed: () -> Unit,
+    viewModel: OtzarIvritViewModel,
+    word: Word
 ) {
     var openDialog by remember { mutableStateOf(true) }
 
-    BasicAlertDialog (
+    BasicAlertDialog(
         onDismissRequest = { openDialog = false },
     ) {
         Surface(
@@ -337,19 +351,22 @@ fun DeleteWordDialog(
                         .padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
                     text = stringResource(R.string.delete_word_question),
                 )
-                Row (
+                Row(
                     modifier = modifier
                         .fillMaxWidth()
                         .padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(
-                        onClick = { openDialog = false }
+                        onClick = { onDismissRequest() }
                     ) {
                         Text(stringResource(R.string.cancel_word_button))
                     }
                     TextButton(
-                        onClick = {}
+                        onClick = {
+                            viewModel.deleteWord(word)
+                            onDismissRequest()
+                        }
                     ) {
                         Text(stringResource(R.string.delete_word_button))
                     }
@@ -371,7 +388,7 @@ fun AddWord(
 
     Surface(
         modifier = modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
+        shadowElevation = 8.dp
     ) {
         Column(
             modifier = modifier
@@ -382,47 +399,47 @@ fun AddWord(
             Text(
                 modifier = modifier
                     .padding(start = 16.dp),
-                text = "Word",
+                text = stringResource(R.string.add_word),
                 style = MaterialTheme.typography.titleLarge,
             )
-            TextField(
+            OutlinedTextField(
                 modifier = modifier
                     .padding(16.dp)
                     .fillMaxWidth(),
                 value = wordInput,
                 onValueChange = { wordInput = it },
                 label = { Text(stringResource(R.string.word_label)) },
-                singleLine = true
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Next
+                ),
+                shape = RoundedCornerShape(16.dp)
             )
-            Text(
-                modifier = modifier
-                    .padding(start = 16.dp),
-                text = "Translation",
-                style = MaterialTheme.typography.titleLarge,
-            )
-            TextField(
+            OutlinedTextField(
                 modifier = modifier
                     .padding(16.dp)
                     .fillMaxWidth(),
                 value = translationInput,
                 onValueChange = { translationInput = it },
                 label = { Text(stringResource(R.string.translation_label)) },
-                singleLine = true
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Next
+                ),
+                shape = RoundedCornerShape(16.dp)
             )
-            Text(
-                modifier = modifier
-                    .padding(start = 16.dp),
-                text = "Transcription",
-                style = MaterialTheme.typography.titleLarge,
-            )
-            TextField(
+            OutlinedTextField(
                 modifier = modifier
                     .padding(16.dp)
                     .fillMaxWidth(),
                 value = transcriptionInput,
                 onValueChange = { transcriptionInput = it },
                 label = { Text(stringResource(R.string.transcription_label)) },
-                singleLine = true
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Default
+                ),
+                shape = RoundedCornerShape(16.dp)
             )
             Button(
                 modifier = modifier
@@ -458,7 +475,8 @@ fun CollectionsScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary
-                )
+                ),
+                modifier = modifier.padding(bottom = 8.dp)
             )
         },
         floatingActionButton = {
@@ -527,6 +545,29 @@ fun FavouritesCard(
 
     }
 
+}
+
+@Composable
+fun FavouritesScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    title: String,
+    onNavigateToNextScreenClicked: () -> Unit,
+    viewModel: OtzarIvritViewModel = viewModel(factory = OtzarIvritViewModel.Factory)
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar()
+        },
+        bottomBar = {
+            NavigationBar(navController)
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = modifier.padding(innerPadding)
+        ) {
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -657,7 +698,7 @@ fun NavigationBar(navController: NavController) {
 
 //PREVIEWS
 
-@Preview(showBackground = true)
+/*@Preview(showBackground = true)
 @Composable
 fun WordsListPreview() {
     OtzarIvritTheme {
@@ -699,10 +740,11 @@ fun WordsListPreview() {
                     translation = "Water"
                 )
             ),
-            modifier = Modifier
+            modifier = Modifier,
+            viewModel = viewModel()
         )
     }
-}
+}*/
 
 @Preview(showBackground = true)
 @Composable
@@ -738,7 +780,7 @@ fun SettingsScreenPreview() {
     }
 }
 
-@Preview
+/*@Preview
 @Composable
 fun WordCardPreview() {
     OtzarIvritTheme {
@@ -747,10 +789,11 @@ fun WordCardPreview() {
                 word = "Word",
                 transcription = "Translation",
                 translation = "Transcription"
-            )
+            ),
+            viewModel = viewModel(),
         )
     }
-}
+}*/
 
 @Preview
 @Composable
@@ -770,24 +813,19 @@ fun BottomNavigationBarPreview() {
     }
 }
 
-@Preview
+/*@Preview
 @Composable
 fun CardModalBottomSheetPreview() {
     OtzarIvritTheme {
         CardModalBottomSheet(onDismissRequest = {})
     }
-}
+}*/
 
+/*
 @Preview
 @Composable
 fun DeleteWordDialogPreview() {
     OtzarIvritTheme {
-        DeleteWordDialog()
+        DeleteWordDialog(onDismissRequest = {})
     }
-}
-
-
-
-
-
-
+}*/

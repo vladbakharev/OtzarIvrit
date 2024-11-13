@@ -36,15 +36,9 @@ class OtzarIvritViewModel(private val wordsRepository: WordsRepository) : ViewMo
             )
         }
 
-    fun deleteWord(word: String, translation: String, transcription: String) =
+    fun deleteWord(word: Word) =
         viewModelScope.launch {
-            wordsRepository.deleteWord(
-                Word(
-                    word = word,
-                    translation = translation,
-                    transcription = transcription
-                )
-            )
+            wordsRepository.deleteWord(word)
         }
 
     fun getWord(): Flow<Word?> = wordsRepository.getWordStream(id = 0)
