@@ -6,8 +6,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.vladbakharev.otzarivrit.AddWord
 import com.vladbakharev.otzarivrit.CollectionsScreen
+import com.vladbakharev.otzarivrit.FavouritesScreen
 import com.vladbakharev.otzarivrit.HomeScreen
 import com.vladbakharev.otzarivrit.SettingsScreen
+import com.vladbakharev.otzarivrit.data.WordDao
+import com.vladbakharev.otzarivrit.data.WordsRepository
+import com.vladbakharev.otzarivrit.ui.viewmodel.OtzarIvritViewModel
 
 @Composable
 fun NavigationStack() {
@@ -67,6 +71,9 @@ fun NavigationStack() {
         }
         composable(Screen.AddWord.route) {
             AddWord(navController = navController)
+        }
+        composable(Screen.FavouriteWords.route) {
+            FavouritesScreen(navController = navController)
         }
     }
 

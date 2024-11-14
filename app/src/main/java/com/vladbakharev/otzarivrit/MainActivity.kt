@@ -493,14 +493,15 @@ fun CollectionsScreen(
         Column(
             modifier = modifier.padding(innerPadding)
         ) {
-            FavouritesCard(modifier)
+            FavouritesCard(modifier, navController)
         }
     }
 }
 
 @Composable
 fun FavouritesCard(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    navController: NavController
 ) {
     Card(
         modifier = modifier
@@ -511,7 +512,8 @@ fun FavouritesCard(
                 top = 8.dp,
                 bottom = 8.dp
             )
-            .height(120.dp),
+            .height(120.dp)
+            .clickable { navController.navigate(route = Screen.FavouriteWords.route) },
         shape = RoundedCornerShape(32.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
@@ -547,17 +549,27 @@ fun FavouritesCard(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavouritesScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    title: String,
-    onNavigateToNextScreenClicked: () -> Unit,
     viewModel: OtzarIvritViewModel = viewModel(factory = OtzarIvritViewModel.Factory)
 ) {
     Scaffold(
         topBar = {
-            TopAppBar()
+            TopAppBar(
+                title = {
+                    Text(
+                        stringResource(R.string.label_favourite)
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary
+                ),
+                modifier = modifier.padding(bottom = 8.dp)
+            )
         },
         bottomBar = {
             NavigationBar(navController)
@@ -795,7 +807,7 @@ fun WordCardPreview() {
     }
 }*/
 
-@Preview
+/*@Preview
 @Composable
 fun FavouritesCardPreview() {
     OtzarIvritTheme {
@@ -803,7 +815,7 @@ fun FavouritesCardPreview() {
             modifier = Modifier
         )
     }
-}
+}*/
 
 @Preview
 @Composable

@@ -6,6 +6,7 @@
     <string name="label_home">Home</string>
     <string name="label_collections">Collections</string>
     <string name="label_settings">Settings</string>
+    <string name="label_favourite">Favourite</string>
 
     <!--Settings-->
     <string name="dark_theme">Dark theme</string>
