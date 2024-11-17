@@ -26,6 +26,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Info
@@ -124,8 +125,6 @@ fun FloatingActionButton(
 fun HomeScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    title: String,
-    onNavigateToNextScreenClicked: () -> Unit,
     viewModel: OtzarIvritViewModel = viewModel(factory = OtzarIvritViewModel.Factory)
 ) {
     val wordsList by viewModel.getAllWordsById().collectAsState(initial = emptyList())
@@ -144,7 +143,11 @@ fun HomeScreen(
         Column(
             modifier = modifier.padding(innerPadding)
         ) {
-            WordsList(words = wordsList, viewModel = viewModel)
+            WordsList(
+                words = wordsList,
+                viewModel = viewModel,
+                navController = navController
+            )
         }
     }
 }
@@ -153,14 +156,15 @@ fun HomeScreen(
 fun WordsList(
     words: List<Word>,
     modifier: Modifier = Modifier,
-    viewModel: OtzarIvritViewModel
+    viewModel: OtzarIvritViewModel = viewModel(factory = OtzarIvritViewModel.Factory),
+    navController: NavController
 ) {
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
     ) {
         items(words) { word ->
-            WordCard(word = word, viewModel = viewModel)
+            WordCard(word = word, viewModel = viewModel, navController = navController)
         }
     }
 }
@@ -170,7 +174,8 @@ fun WordsList(
 fun WordCard(
     modifier: Modifier = Modifier,
     word: Word,
-    viewModel: OtzarIvritViewModel
+    viewModel: OtzarIvritViewModel,
+    navController: NavController
 ) {
     var toggleButtonChecked by remember { mutableStateOf(false) }
     var isModalBottomSheetVisible by remember { mutableStateOf(false) }
@@ -261,7 +266,8 @@ fun WordCard(
         CardModalBottomSheet(
             onDismissRequest = { isModalBottomSheetVisible = false },
             word = word,
-            viewModel = viewModel
+            viewModel = viewModel,
+            navController = navController
         )
     }
 }
@@ -272,6 +278,7 @@ fun CardModalBottomSheet(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
     word: Word,
+    navController: NavController,
     viewModel: OtzarIvritViewModel
 ) {
     val modalBottomSheetState = rememberModalBottomSheetState()
@@ -303,6 +310,29 @@ fun CardModalBottomSheet(
                             isDeleteDialogVisible = true
                         },
                     text = stringResource(R.string.delete)
+                )
+            }
+            Row(
+                modifier = modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Icon(
+                    modifier = modifier
+                        .padding(16.dp),
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = stringResource(R.string.edit)
+                )
+                Text(
+                    modifier = modifier
+                        .padding(16.dp)
+                        .fillMaxWidth()
+                        .clickable {
+                            onDismissRequest()
+                            navController.navigate(route = Screen.EditWord.route + "/${word.id}")
+                        },
+                    text = stringResource(R.string.edit)
                 )
             }
         }
@@ -365,12 +395,98 @@ fun DeleteWordDialog(
                     TextButton(
                         onClick = {
                             viewModel.deleteWord(word)
-                            onDismissRequest()
+                            onDeleteConfirmed()
                         }
                     ) {
                         Text(stringResource(R.string.delete_word_button))
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun EditWordScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    viewModel: OtzarIvritViewModel = viewModel(factory = OtzarIvritViewModel.Factory),
+    word: Word,
+) {
+
+    var wordInputEdit by remember { mutableStateOf(word.word) }
+    var translationInputEdit by remember { mutableStateOf(word.translation) }
+    var transcriptionInputEdit by remember { mutableStateOf(word.transcription) }
+
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        shadowElevation = 8.dp
+    ) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                modifier = modifier
+                    .padding(start = 16.dp),
+                text = stringResource(R.string.edit_word),
+                style = MaterialTheme.typography.titleLarge,
+            )
+            OutlinedTextField(
+                modifier = modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                value = wordInputEdit,
+                onValueChange = { wordInputEdit = it },
+                label = { Text(stringResource(R.string.word_label)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Next
+                ),
+                shape = RoundedCornerShape(16.dp)
+            )
+            OutlinedTextField(
+                modifier = modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                value = translationInputEdit,
+                onValueChange = { translationInputEdit = it },
+                label = { Text(stringResource(R.string.translation_label)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Next
+                ),
+                shape = RoundedCornerShape(16.dp)
+            )
+            OutlinedTextField(
+                modifier = modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                value = transcriptionInputEdit,
+                onValueChange = { transcriptionInputEdit = it },
+                label = { Text(stringResource(R.string.transcription_label)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Default
+                ),
+                shape = RoundedCornerShape(16.dp)
+            )
+            Button(
+                modifier = modifier
+                    .padding(16.dp)
+                    .align(Alignment.End),
+                onClick = {
+                    viewModel.updateWord(
+                        wordInputEdit,
+                        translationInputEdit,
+                        transcriptionInputEdit
+                    )
+                    navController.navigate(route = Screen.Home.route)
+                },
+            ) {
+                Text(stringResource(R.string.edit_button))
             }
         }
     }
@@ -447,10 +563,10 @@ fun AddWord(
                     .align(Alignment.End),
                 onClick = {
                     viewModel.insertWord(wordInput, translationInput, transcriptionInput)
-                    navController.navigate(route = Screen.HomeRoot.route)
+                    navController.navigate(route = Screen.Home.route)
                 },
             ) {
-                Text("Add")
+                Text(stringResource(R.string.add_button))
             }
         }
     }
@@ -460,9 +576,7 @@ fun AddWord(
 @Composable
 fun CollectionsScreen(
     modifier: Modifier = Modifier,
-    navController: NavController,
-    title: String,
-    onNavigateToNextScreenClicked: () -> Unit
+    navController: NavController
 ) {
     Scaffold(
         topBar = {
@@ -528,7 +642,6 @@ fun FavouritesCard(
                 imageVector = Icons.Default.Favorite,
                 contentDescription = stringResource(R.string.favourite),
                 modifier = modifier
-//                    .size(50.dp)
                     .weight(0.3f)
                     .fillMaxSize()
             )
@@ -542,11 +655,8 @@ fun FavouritesCard(
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
-
         }
-
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -586,9 +696,7 @@ fun FavouritesScreen(
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
-    navController: NavController,
-    title: String,
-    onNavigateToNextScreenClicked: () -> Unit
+    navController: NavController
 ) {
     Scaffold(
         topBar = {
@@ -668,7 +776,7 @@ fun SettingsScreen(
 fun NavigationBar(navController: NavController) {
     val currentRoute = navController.currentBackStackEntryFlow.map { backStackEntry ->
         backStackEntry.destination.route
-    }.collectAsState(initial = Screen.HomeRoot.route)
+    }.collectAsState(initial = Screen.Home.route)
 
     val items = listOf(
         NavBar.Home,
@@ -763,22 +871,25 @@ fun WordsListPreview() {
 fun CollectionsScreenPreview() {
     OtzarIvritTheme {
         CollectionsScreen(
-            navController = NavController(MainActivity()),
-            title = stringResource(R.string.label_collections),
-            onNavigateToNextScreenClicked = {})
+            navController = NavController(MainActivity())
+        )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun TopAppBarPreview() {
-    TopAppBar()
+    OtzarIvritTheme {
+        TopAppBar()
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun FloatingActionButtonPreview() {
-    FloatingActionButton(navController = NavController(MainActivity()))
+    OtzarIvritTheme {
+        FloatingActionButton(navController = NavController(MainActivity()))
+    }
 }
 
 @Preview(showBackground = true)
@@ -786,9 +897,8 @@ fun FloatingActionButtonPreview() {
 fun SettingsScreenPreview() {
     OtzarIvritTheme {
         SettingsScreen(
-            navController = NavController(MainActivity()),
-            title = stringResource(R.string.label_settings),
-            onNavigateToNextScreenClicked = {})
+            navController = NavController(MainActivity())
+        )
     }
 }
 

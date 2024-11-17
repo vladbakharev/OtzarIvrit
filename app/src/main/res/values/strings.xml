@@ -17,6 +17,7 @@
     <string name="translation_label">Translation</string>
     <string name="transcription_label">Transcription</string>
     <string name="add_word">Add your word</string>
+    <string name="edit_word">Edit your word</string>
 
     <!--Icons-->
     <string name="favourite">Favourite</string>
@@ -26,11 +27,16 @@
 
     <!--ModalBottomSheet-->
     <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
 
     <!--AlertDialogs-->
     <string name="delete_word">Delete the word</string>"
     <string name="delete_word_question">Are you sure you want to delete this word?</string>
     <string name="cancel_word_button">Cancel</string>
     <string name="delete_word_button">Delete</string>
+
+    <!--Buttons-->
+    <string name="add_button">Add</string>
+    <string name="edit_button">Edit</string>
 
 </resources>
