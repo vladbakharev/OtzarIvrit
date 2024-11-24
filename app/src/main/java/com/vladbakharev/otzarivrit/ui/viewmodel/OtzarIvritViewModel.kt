@@ -41,7 +41,7 @@ class OtzarIvritViewModel(private val wordsRepository: WordsRepository) : ViewMo
             wordsRepository.deleteWord(word)
         }
 
-    fun getWord(): Flow<Word?> = wordsRepository.getWordStream(id = 0)
+    fun getWordById(id: Int): Flow<Word?> = wordsRepository.getWordById(id = 0)
 
     fun getAllWords(): Flow<List<Word>> = wordsRepository.getAllWordsStream()
 

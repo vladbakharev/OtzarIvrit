@@ -20,7 +20,7 @@ interface WordDao {
     suspend fun delete(word: Word)
 
     @Query("SELECT * FROM words WHERE id = :id")
-    fun getWord(id: Int): Flow<Word>
+    fun getWordById(id: Int): Flow<Word>
 
     @Query("SELECT * FROM words ORDER BY word ASC")
     fun getAllWords(): Flow<List<Word>>

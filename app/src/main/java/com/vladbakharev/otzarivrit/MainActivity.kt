@@ -330,7 +330,7 @@ fun CardModalBottomSheet(
                         .fillMaxWidth()
                         .clickable {
                             onDismissRequest()
-                            navController.navigate(route = Screen.EditWord.route + "/${word.id}")
+                            navController.navigate(route = "${Screen.EditWord.route}/${word.id}")
                         },
                     text = stringResource(R.string.edit)
                 )
@@ -411,82 +411,85 @@ fun EditWordScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     viewModel: OtzarIvritViewModel = viewModel(factory = OtzarIvritViewModel.Factory),
-    word: Word,
+    wordId: Int
 ) {
+    val wordEdit by viewModel.getWordById(wordId).collectAsState(initial = null)
 
-    var wordInputEdit by remember { mutableStateOf(word.word) }
-    var translationInputEdit by remember { mutableStateOf(word.translation) }
-    var transcriptionInputEdit by remember { mutableStateOf(word.transcription) }
+    wordEdit?.let {
+        var wordInputEdit by remember { mutableStateOf(it.word) }
+        var translationInputEdit by remember { mutableStateOf(it.translation) }
+        var transcriptionInputEdit by remember { mutableStateOf(it.transcription) }
 
-    Surface(
-        modifier = modifier.fillMaxSize(),
-        shadowElevation = 8.dp
-    ) {
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
+        Surface(
+            modifier = modifier.fillMaxSize(),
+            shadowElevation = 8.dp
         ) {
-            Text(
+            Column(
                 modifier = modifier
-                    .padding(start = 16.dp),
-                text = stringResource(R.string.edit_word),
-                style = MaterialTheme.typography.titleLarge,
-            )
-            OutlinedTextField(
-                modifier = modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                value = wordInputEdit,
-                onValueChange = { wordInputEdit = it },
-                label = { Text(stringResource(R.string.word_label)) },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Next
-                ),
-                shape = RoundedCornerShape(16.dp)
-            )
-            OutlinedTextField(
-                modifier = modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                value = translationInputEdit,
-                onValueChange = { translationInputEdit = it },
-                label = { Text(stringResource(R.string.translation_label)) },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Next
-                ),
-                shape = RoundedCornerShape(16.dp)
-            )
-            OutlinedTextField(
-                modifier = modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                value = transcriptionInputEdit,
-                onValueChange = { transcriptionInputEdit = it },
-                label = { Text(stringResource(R.string.transcription_label)) },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Default
-                ),
-                shape = RoundedCornerShape(16.dp)
-            )
-            Button(
-                modifier = modifier
-                    .padding(16.dp)
-                    .align(Alignment.End),
-                onClick = {
-                    viewModel.updateWord(
-                        wordInputEdit,
-                        translationInputEdit,
-                        transcriptionInputEdit
-                    )
-                    navController.navigate(route = Screen.Home.route)
-                },
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center,
             ) {
-                Text(stringResource(R.string.edit_button))
+                Text(
+                    modifier = modifier
+                        .padding(start = 16.dp),
+                    text = stringResource(R.string.edit_word),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                OutlinedTextField(
+                    modifier = modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    value = wordInputEdit,
+                    onValueChange = { wordInputEdit = it },
+                    label = { Text(stringResource(R.string.word_label)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Next
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                )
+                OutlinedTextField(
+                    modifier = modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    value = translationInputEdit,
+                    onValueChange = { translationInputEdit = it },
+                    label = { Text(stringResource(R.string.translation_label)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Next
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                )
+                OutlinedTextField(
+                    modifier = modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    value = transcriptionInputEdit,
+                    onValueChange = { transcriptionInputEdit = it },
+                    label = { Text(stringResource(R.string.transcription_label)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Default
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                )
+                Button(
+                    modifier = modifier
+                        .padding(16.dp)
+                        .align(Alignment.End),
+                    onClick = {
+                        viewModel.updateWord(
+                            wordInputEdit,
+                            translationInputEdit,
+                            transcriptionInputEdit
+                        )
+                        navController.navigate(route = Screen.Home.route)
+                    },
+                ) {
+                    Text(stringResource(R.string.edit_button))
+                }
             }
         }
     }
