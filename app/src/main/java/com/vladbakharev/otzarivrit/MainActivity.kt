@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -45,6 +46,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -411,9 +413,9 @@ fun EditWordScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     viewModel: OtzarIvritViewModel = viewModel(factory = OtzarIvritViewModel.Factory),
-    wordId: Int
+    id: Int
 ) {
-    val wordEdit by viewModel.getWordById(wordId).collectAsState(initial = null)
+    val wordEdit by viewModel.getWordById(id).collectAsState(initial = null)
 
     wordEdit?.let {
         var wordInputEdit by remember { mutableStateOf(it.word) }
@@ -481,9 +483,10 @@ fun EditWordScreen(
                         .align(Alignment.End),
                     onClick = {
                         viewModel.updateWord(
-                            wordInputEdit,
-                            translationInputEdit,
-                            transcriptionInputEdit
+                            id = id,
+                            word = wordInputEdit,
+                            translation = translationInputEdit,
+                            transcription = transcriptionInputEdit
                         )
                         navController.navigate(route = Screen.Home.route)
                     },
@@ -505,71 +508,89 @@ fun AddWord(
     var translationInput by remember { mutableStateOf("") }
     var transcriptionInput by remember { mutableStateOf("") }
 
-    Surface(
-        modifier = modifier.fillMaxSize(),
-        shadowElevation = 8.dp
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
+        Surface(
             modifier = modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
+                .fillMaxWidth()
+                .padding(16.dp)
+                .height(500.dp),
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.background,
+            shadowElevation = 16.dp,
+            tonalElevation = 16.dp
         ) {
-            Text(
+            Column(
                 modifier = modifier
-                    .padding(start = 16.dp),
-                text = stringResource(R.string.add_word),
-                style = MaterialTheme.typography.titleLarge,
-            )
-            OutlinedTextField(
-                modifier = modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                value = wordInput,
-                onValueChange = { wordInput = it },
-                label = { Text(stringResource(R.string.word_label)) },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Next
-                ),
-                shape = RoundedCornerShape(16.dp)
-            )
-            OutlinedTextField(
-                modifier = modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                value = translationInput,
-                onValueChange = { translationInput = it },
-                label = { Text(stringResource(R.string.translation_label)) },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Next
-                ),
-                shape = RoundedCornerShape(16.dp)
-            )
-            OutlinedTextField(
-                modifier = modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                value = transcriptionInput,
-                onValueChange = { transcriptionInput = it },
-                label = { Text(stringResource(R.string.transcription_label)) },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Default
-                ),
-                shape = RoundedCornerShape(16.dp)
-            )
-            Button(
-                modifier = modifier
-                    .padding(16.dp)
-                    .align(Alignment.End),
-                onClick = {
-                    viewModel.insertWord(wordInput, translationInput, transcriptionInput)
-                    navController.navigate(route = Screen.Home.route)
-                },
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center,
             ) {
-                Text(stringResource(R.string.add_button))
+                Text(
+                    modifier = modifier
+                        .padding(start = 16.dp),
+                    text = stringResource(R.string.add_word),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                OutlinedTextField(
+                    modifier = modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    value = wordInput,
+                    onValueChange = { wordInput = it },
+                    label = { Text(stringResource(R.string.word_label)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Next
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                )
+                OutlinedTextField(
+                    modifier = modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    value = translationInput,
+                    onValueChange = { translationInput = it },
+                    label = { Text(stringResource(R.string.translation_label)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Next
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                )
+                OutlinedTextField(
+                    modifier = modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    value = transcriptionInput,
+                    onValueChange = { transcriptionInput = it },
+                    label = { Text(stringResource(R.string.transcription_label)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Default
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                )
+                Button(
+                    modifier = modifier
+                        .padding(16.dp)
+                        .align(Alignment.End),
+                    onClick = {
+                        if (wordInput.isNotEmpty() && translationInput.isNotEmpty()
+                            && transcriptionInput.isNotEmpty()
+                        ) {
+                            viewModel.insertWord(wordInput, translationInput, transcriptionInput)
+                            navController.navigate(route = Screen.Home.route)
+                        }
+                    }
+                ) {
+                    Text(stringResource(R.string.add_button))
+                }
             }
         }
     }
@@ -821,54 +842,6 @@ fun NavigationBar(navController: NavController) {
 
 //PREVIEWS
 
-/*@Preview(showBackground = true)
-@Composable
-fun WordsListPreview() {
-    OtzarIvritTheme {
-        WordsList(
-            words = listOf(
-                Word(
-                    word = "בוקר",
-                    transcription = "Boker",
-                    translation = "Morning"
-                ),
-                Word(
-                    word = "טוב",
-                    transcription = "Tov",
-                    translation = "Good"
-                ),
-                Word(
-                    word = "אתה",
-                    transcription = "Atah",
-                    translation = "You"
-                ),
-                Word(
-                    word = "מורה",
-                    transcription = "Moreh",
-                    translation = "Teacher"
-                ),
-                Word(
-                    word = "תלמיד",
-                    transcription = "Tal'mid",
-                    translation = "Pupil"
-                ),
-                Word(
-                    word = "חייל",
-                    transcription = "Hayal",
-                    translation = "Soldier"
-                ),
-                Word(
-                    word = "מים",
-                    transcription = "Maim",
-                    translation = "Water"
-                )
-            ),
-            modifier = Modifier,
-            viewModel = viewModel()
-        )
-    }
-}*/
-
 @Preview(showBackground = true)
 @Composable
 fun CollectionsScreenPreview() {
@@ -905,31 +878,6 @@ fun SettingsScreenPreview() {
     }
 }
 
-/*@Preview
-@Composable
-fun WordCardPreview() {
-    OtzarIvritTheme {
-        WordCard(
-            word = Word(
-                word = "Word",
-                transcription = "Translation",
-                translation = "Transcription"
-            ),
-            viewModel = viewModel(),
-        )
-    }
-}*/
-
-/*@Preview
-@Composable
-fun FavouritesCardPreview() {
-    OtzarIvritTheme {
-        FavouritesCard(
-            modifier = Modifier
-        )
-    }
-}*/
-
 @Preview
 @Composable
 fun BottomNavigationBarPreview() {
@@ -937,20 +885,3 @@ fun BottomNavigationBarPreview() {
         NavigationBar(navController = NavController(MainActivity()))
     }
 }
-
-/*@Preview
-@Composable
-fun CardModalBottomSheetPreview() {
-    OtzarIvritTheme {
-        CardModalBottomSheet(onDismissRequest = {})
-    }
-}*/
-
-/*
-@Preview
-@Composable
-fun DeleteWordDialogPreview() {
-    OtzarIvritTheme {
-        DeleteWordDialog(onDismissRequest = {})
-    }
-}*/

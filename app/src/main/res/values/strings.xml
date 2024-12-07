@@ -39,4 +39,7 @@
     <string name="add_button">Add</string>
     <string name="edit_button">Edit</string>
 
+    <!--Snackbar-->
+    <string name="complete_fields">Complete all the fields</string>
+
 </resources>

@@ -25,10 +25,11 @@ class OtzarIvritViewModel(private val wordsRepository: WordsRepository) : ViewMo
             )
         }
 
-    fun updateWord(word: String, translation: String, transcription: String) =
+    fun updateWord(id: Int, word: String, translation: String, transcription: String) =
         viewModelScope.launch {
             wordsRepository.updateWord(
                 Word(
+                    id = id,
                     word = word,
                     translation = translation,
                     transcription = transcription
@@ -41,7 +42,7 @@ class OtzarIvritViewModel(private val wordsRepository: WordsRepository) : ViewMo
             wordsRepository.deleteWord(word)
         }
 
-    fun getWordById(id: Int): Flow<Word?> = wordsRepository.getWordById(id = 0)
+    fun getWordById(id: Int): Flow<Word?> = wordsRepository.getWordById(id)
 
     fun getAllWords(): Flow<List<Word>> = wordsRepository.getAllWordsStream()
 

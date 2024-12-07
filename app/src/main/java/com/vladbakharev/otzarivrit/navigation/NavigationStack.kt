@@ -34,11 +34,11 @@ fun NavigationStack() {
             FavouritesScreen(navController = navController)
         }
         composable(
-            route = "${Screen.EditWord.route}/{wordId}",
-            arguments = listOf(navArgument("wordId") { type = NavType.IntType })
+            route = "${Screen.EditWord.route}/{id}",
+            arguments = listOf(navArgument("id") { type = NavType.IntType })
         ) { backStackEntry ->
-            val wordId = backStackEntry.arguments?.getInt("wordId") ?: 0
-            EditWordScreen(navController = navController, wordId = wordId)
+            val wordId = backStackEntry.arguments?.getInt("id") ?: 0
+            EditWordScreen(navController = navController, id = wordId)
         }
     }
 }
