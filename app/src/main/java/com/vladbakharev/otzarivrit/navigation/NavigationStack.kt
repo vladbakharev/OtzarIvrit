@@ -6,12 +6,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.vladbakharev.otzarivrit.AddWord
-import com.vladbakharev.otzarivrit.CollectionsScreen
-import com.vladbakharev.otzarivrit.EditWordScreen
-import com.vladbakharev.otzarivrit.FavouritesScreen
-import com.vladbakharev.otzarivrit.HomeScreen
-import com.vladbakharev.otzarivrit.SettingsScreen
+import com.vladbakharev.otzarivrit.screens.AddWordScreen
+import com.vladbakharev.otzarivrit.screens.CollectionsScreen
+import com.vladbakharev.otzarivrit.screens.EditWordScreen
+import com.vladbakharev.otzarivrit.screens.FavouritesScreen
+import com.vladbakharev.otzarivrit.screens.HomeScreen
+import com.vladbakharev.otzarivrit.screens.SettingsScreen
 
 @Composable
 fun NavigationStack() {
@@ -28,7 +28,7 @@ fun NavigationStack() {
             SettingsScreen(navController = navController)
         }
         composable(route = Screen.AddWord.route) {
-            AddWord(navController = navController)
+            AddWordScreen(navController = navController)
         }
         composable(route = Screen.FavouriteWords.route) {
             FavouritesScreen(navController = navController)
