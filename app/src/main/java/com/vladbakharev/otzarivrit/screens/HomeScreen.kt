@@ -1,6 +1,7 @@
 package com.vladbakharev.otzarivrit.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -43,6 +44,7 @@ import com.vladbakharev.otzarivrit.reusable_components.BasicNavigationBar
 import com.vladbakharev.otzarivrit.reusable_components.BasicTopAppBar
 import com.vladbakharev.otzarivrit.reusable_components.CardModalBottomSheet
 import com.vladbakharev.otzarivrit.reusable_components.HomeFloatingActionButton
+import com.vladbakharev.otzarivrit.ui.theme.Black
 import com.vladbakharev.otzarivrit.ui.viewmodel.OtzarIvritViewModel
 
 @Composable
@@ -55,7 +57,7 @@ fun HomeScreen(
 
     Scaffold(
         topBar = {
-            BasicTopAppBar()
+            BasicTopAppBar(title = R.string.home_title)
         },
         floatingActionButton = {
             HomeFloatingActionButton(navController)
@@ -65,7 +67,8 @@ fun HomeScreen(
         }
     ) { innerPadding ->
         Column(
-            modifier = modifier.padding(innerPadding)
+            modifier = modifier
+                .padding(innerPadding)
         ) {
             WordsList(
                 words = wordsList,
@@ -121,7 +124,10 @@ fun WordCard(
                 onClick = {}
             ),
         shape = RoundedCornerShape(32.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondary,
+        )
     ) {
         Row(
             modifier = modifier

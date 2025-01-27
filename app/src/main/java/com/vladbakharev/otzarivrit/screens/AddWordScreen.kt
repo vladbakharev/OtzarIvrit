@@ -47,82 +47,71 @@ fun AddWordScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Surface(
+        Column(
             modifier = modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .height(500.dp),
-            shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.background,
-            shadowElevation = 16.dp,
-            tonalElevation = 16.dp
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
         ) {
-            Column(
+            Text(
                 modifier = modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Text(
-                    modifier = modifier
-                        .padding(start = 16.dp),
-                    text = stringResource(R.string.add_word),
-                    style = MaterialTheme.typography.titleLarge,
-                )
-                OutlinedTextField(
-                    modifier = modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    value = wordInput,
-                    onValueChange = { wordInput = it },
-                    label = { Text(stringResource(R.string.word_label)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        imeAction = ImeAction.Next
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                )
-                OutlinedTextField(
-                    modifier = modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    value = translationInput,
-                    onValueChange = { translationInput = it },
-                    label = { Text(stringResource(R.string.translation_label)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        imeAction = ImeAction.Next
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                )
-                OutlinedTextField(
-                    modifier = modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    value = transcriptionInput,
-                    onValueChange = { transcriptionInput = it },
-                    label = { Text(stringResource(R.string.transcription_label)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        imeAction = ImeAction.Default
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                )
-                Button(
-                    modifier = modifier
-                        .padding(16.dp)
-                        .align(Alignment.End),
-                    onClick = {
-                        if (wordInput.isNotEmpty() && translationInput.isNotEmpty()
-                            && transcriptionInput.isNotEmpty()
-                        ) {
-                            viewModel.insertWord(wordInput, translationInput, transcriptionInput)
-                            navController.navigate(route = Screen.Home.route)
-                        }
+                    .padding(start = 16.dp),
+                text = stringResource(R.string.add_word),
+                style = MaterialTheme.typography.titleLarge,
+            )
+            OutlinedTextField(
+                modifier = modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                value = wordInput,
+                onValueChange = { wordInput = it },
+                label = { Text(stringResource(R.string.word_label)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Next
+                ),
+                shape = RoundedCornerShape(16.dp)
+            )
+            OutlinedTextField(
+                modifier = modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                value = translationInput,
+                onValueChange = { translationInput = it },
+                label = { Text(stringResource(R.string.translation_label)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Next
+                ),
+                shape = RoundedCornerShape(16.dp)
+            )
+            OutlinedTextField(
+                modifier = modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                value = transcriptionInput,
+                onValueChange = { transcriptionInput = it },
+                label = { Text(stringResource(R.string.transcription_label)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Default
+                ),
+                shape = RoundedCornerShape(16.dp)
+            )
+            Button(
+                modifier = modifier
+                    .padding(16.dp)
+                    .align(Alignment.End),
+                onClick = {
+                    if (wordInput.isNotEmpty() && translationInput.isNotEmpty()
+                        && transcriptionInput.isNotEmpty()
+                    ) {
+                        viewModel.insertWord(wordInput, translationInput, transcriptionInput)
+                        navController.navigate(route = Screen.Home.route)
                     }
-                ) {
-                    Text(stringResource(R.string.add_button))
                 }
+            ) {
+                Text(stringResource(R.string.add_button))
             }
         }
     }

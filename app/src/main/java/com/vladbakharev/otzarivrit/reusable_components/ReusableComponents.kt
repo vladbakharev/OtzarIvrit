@@ -4,10 +4,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -22,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -37,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -52,16 +56,19 @@ import kotlinx.coroutines.flow.map
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BasicTopAppBar(modifier: Modifier = Modifier) {
+fun BasicTopAppBar(
+    modifier: Modifier = Modifier,
+    title: Int
+) {
     TopAppBar(
         title = {
             Text(
-                stringResource(R.string.app_name)
+                stringResource(title)
             )
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.primary
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = Color.White
         ),
         modifier = modifier.padding(bottom = 8.dp)
     )
@@ -71,6 +78,7 @@ fun BasicTopAppBar(modifier: Modifier = Modifier) {
 fun HomeFloatingActionButton(navController: NavController) {
     FloatingActionButton(
         onClick = { navController.navigate(route = Screen.AddWord.route) },
+        containerColor = MaterialTheme.colorScheme.primary
     ) {
         Icon(Icons.Default.Add, contentDescription = stringResource(R.string.fab_add))
     }
@@ -96,13 +104,18 @@ fun BasicNavigationBar(navController: NavController) {
         }
     }
 
-    NavigationBar {
+    NavigationBar(
+        containerColor = MaterialTheme.colorScheme.secondary
+    ) {
         items.forEachIndexed { index, item ->
             NavigationBarItem(
                 alwaysShowLabel = true,
                 icon = { Icon(item.icon, contentDescription = item.title) },
                 label = { Text(item.title) },
                 selected = selectedItem == index,
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = MaterialTheme.colorScheme.primary
+                ),
                 onClick = {
                     selectedItem = index
                     navController.navigate(item.rootRoute.route) {
@@ -140,7 +153,10 @@ fun CardModalBottomSheet(
         Column {
             Row(
                 modifier = modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .clickable {
+                        isDeleteDialogVisible = true
+                    },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start
             ) {
@@ -153,16 +169,17 @@ fun CardModalBottomSheet(
                 Text(
                     modifier = modifier
                         .padding(16.dp)
-                        .fillMaxWidth()
-                        .clickable {
-                            isDeleteDialogVisible = true
-                        },
+                        .fillMaxWidth(),
                     text = stringResource(R.string.delete)
                 )
             }
             Row(
                 modifier = modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .clickable {
+                        onDismissRequest()
+                        navController.navigate(route = "${Screen.EditWord.route}/${word.id}")
+                    },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start
             ) {
@@ -175,11 +192,7 @@ fun CardModalBottomSheet(
                 Text(
                     modifier = modifier
                         .padding(16.dp)
-                        .fillMaxWidth()
-                        .clickable {
-                            onDismissRequest()
-                            navController.navigate(route = "${Screen.EditWord.route}/${word.id}")
-                        },
+                        .fillMaxWidth(),
                     text = stringResource(R.string.edit)
                 )
             }
@@ -187,7 +200,10 @@ fun CardModalBottomSheet(
     }
     if (isDeleteDialogVisible) {
         DeleteWordDialog(
-            onDismissRequest = { isDeleteDialogVisible = false },
+            onDismissRequest = {
+                isDeleteDialogVisible = false
+                onDismissRequest()
+            },
             word = word,
             viewModel = viewModel,
             onDeleteConfirmed = { onDismissRequest() }
@@ -254,13 +270,28 @@ fun DeleteWordDialog(
     }
 }
 
+@Composable
+fun CollectionsGrid(
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize()
+    ) {
+//        items()
+
+
+    }
+
+}
+
 //PREVIEWS
 
 @Preview(showBackground = true)
 @Composable
 fun BasicTopAppBarPreview() {
     OtzarIvritTheme {
-        BasicTopAppBar()
+        BasicTopAppBar(title = R.string.home_title)
     }
 }
 

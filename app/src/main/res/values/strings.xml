@@ -30,7 +30,7 @@
     <string name="edit">Edit</string>
 
     <!--AlertDialogs-->
-    <string name="delete_word">Delete the word</string>"
+    <string name="delete_word">Delete the word</string>
     <string name="delete_word_question">Are you sure you want to delete this word?</string>
     <string name="cancel_word_button">Cancel</string>
     <string name="delete_word_button">Delete</string>
@@ -41,5 +41,10 @@
 
     <!--Snackbar-->
     <string name="complete_fields">Complete all the fields</string>
+
+    <!--TopAppBar titles-->
+    <string name="home_title">Home</string>
+    <string name="collections_title">Collections</string>
+    <string name="settings_title">Settings</string>
 
 </resources>

@@ -15,14 +15,11 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,9 +33,10 @@ import com.vladbakharev.otzarivrit.MainActivity
 import com.vladbakharev.otzarivrit.R
 import com.vladbakharev.otzarivrit.navigation.Screen
 import com.vladbakharev.otzarivrit.reusable_components.BasicNavigationBar
+import com.vladbakharev.otzarivrit.reusable_components.BasicTopAppBar
+import com.vladbakharev.otzarivrit.reusable_components.HomeFloatingActionButton
 import com.vladbakharev.otzarivrit.ui.theme.OtzarIvritTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CollectionsScreen(
     modifier: Modifier = Modifier,
@@ -46,25 +44,13 @@ fun CollectionsScreen(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        stringResource(R.string.label_collections)
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary
-                ),
-                modifier = modifier.padding(bottom = 8.dp)
+            BasicTopAppBar(
+                modifier = modifier.padding(bottom = 8.dp),
+                title = R.string.collections_title
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navController.navigate(route = Screen.AddWord.route) }
-            ) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.fab_add))
-            }
+           HomeFloatingActionButton(navController)
         },
         bottomBar = {
             BasicNavigationBar(navController)
