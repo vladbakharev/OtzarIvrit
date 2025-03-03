@@ -53,7 +53,7 @@ fun CollectionsScreen(
            HomeFloatingActionButton(navController)
         },
         bottomBar = {
-            BasicNavigationBar(navController)
+            BasicNavigationBar(navController = navController)
         }
     ) { innerPadding ->
         Column(

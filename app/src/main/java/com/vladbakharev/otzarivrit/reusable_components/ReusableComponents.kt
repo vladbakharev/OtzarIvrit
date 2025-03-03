@@ -1,25 +1,38 @@
 package com.vladbakharev.otzarivrit.reusable_components
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
@@ -40,10 +53,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.vladbakharev.otzarivrit.MainActivity
 import com.vladbakharev.otzarivrit.R
@@ -51,6 +68,7 @@ import com.vladbakharev.otzarivrit.data.Word
 import com.vladbakharev.otzarivrit.navigation.NavBar
 import com.vladbakharev.otzarivrit.navigation.Screen
 import com.vladbakharev.otzarivrit.ui.theme.OtzarIvritTheme
+import com.vladbakharev.otzarivrit.ui.theme.White
 import com.vladbakharev.otzarivrit.ui.viewmodel.OtzarIvritViewModel
 import kotlinx.coroutines.flow.map
 
@@ -62,15 +80,12 @@ fun BasicTopAppBar(
 ) {
     TopAppBar(
         title = {
-            Text(
-                stringResource(title)
-            )
+            Text(stringResource(title))
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = Color.White
-        ),
-        modifier = modifier.padding(bottom = 8.dp)
+            titleContentColor = MaterialTheme.colorScheme.secondary
+        )
     )
 }
 
@@ -78,14 +93,18 @@ fun BasicTopAppBar(
 fun HomeFloatingActionButton(navController: NavController) {
     FloatingActionButton(
         onClick = { navController.navigate(route = Screen.AddWord.route) },
-        containerColor = MaterialTheme.colorScheme.primary
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.secondary
     ) {
         Icon(Icons.Default.Add, contentDescription = stringResource(R.string.fab_add))
     }
 }
 
 @Composable
-fun BasicNavigationBar(navController: NavController) {
+fun BasicNavigationBar(
+    modifier: Modifier = Modifier,
+    navController: NavController
+) {
     val currentRoute = navController.currentBackStackEntryFlow.map { backStackEntry ->
         backStackEntry.destination.route
     }.collectAsState(initial = Screen.Home.route)
@@ -104,31 +123,63 @@ fun BasicNavigationBar(navController: NavController) {
         }
     }
 
-    NavigationBar(
-        containerColor = MaterialTheme.colorScheme.secondary
+    Surface(
+        shadowElevation = 16.dp,
+        color = White
     ) {
-        items.forEachIndexed { index, item ->
-            NavigationBarItem(
-                alwaysShowLabel = true,
-                icon = { Icon(item.icon, contentDescription = item.title) },
-                label = { Text(item.title) },
-                selected = selectedItem == index,
-                colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = MaterialTheme.colorScheme.primary
-                ),
-                onClick = {
-                    selectedItem = index
-                    navController.navigate(item.rootRoute.route) {
-                        navController.graph.startDestinationRoute?.let { route ->
-                            popUpTo(route) {
-                                saveState = true
+        NavigationBar(
+            containerColor = MaterialTheme.colorScheme.secondary
+        ) {
+            items.forEachIndexed { index, item ->
+
+                val scale by animateFloatAsState(
+                    targetValue = if (selectedItem == index) 1.2f else 1f,
+                    animationSpec = tween(durationMillis = 300)
+                )
+
+                NavigationBarItem(
+                    alwaysShowLabel = true,
+                    icon = {
+                        Icon(
+                            painter = painterResource(item.icon),
+                            contentDescription = item.title,
+                            modifier = modifier.graphicsLayer(
+                                scaleX = scale,
+                                scaleY = scale
+                            )
+                        )
+                    },
+                    label = {
+                        Text(
+                            text = item.title,
+                            modifier = modifier.graphicsLayer(
+                                scaleX = scale,
+                                scaleY = scale
+                            )
+                        )
+                    },
+                    selected = selectedItem == index,
+                    colors = NavigationBarItemDefaults.colors(
+                        indicatorColor = MaterialTheme.colorScheme.secondary,
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        unselectedIconColor = MaterialTheme.colorScheme.tertiary,
+                        unselectedTextColor = MaterialTheme.colorScheme.tertiary
+                    ),
+                    onClick = {
+                        selectedItem = index
+                        navController.navigate(item.rootRoute.route) {
+                            navController.graph.startDestinationRoute?.let { route ->
+                                popUpTo(route) {
+                                    saveState = true
+                                }
                             }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
                     }
-                }
-            )
+                )
+            }
         }
     }
 }
@@ -271,6 +322,132 @@ fun DeleteWordDialog(
 }
 
 @Composable
+fun WordsList(
+    words: List<Word>,
+    modifier: Modifier = Modifier,
+    viewModel: OtzarIvritViewModel = viewModel(factory = OtzarIvritViewModel.Factory),
+    navController: NavController
+) {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize()
+    ) {
+        items(words) { word ->
+            WordCard(word = word, viewModel = viewModel, navController = navController)
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun WordCard(
+    modifier: Modifier = Modifier,
+    word: Word,
+    viewModel: OtzarIvritViewModel,
+    navController: NavController
+) {
+    var toggleButtonChecked by remember { mutableStateOf(false) }
+    var isModalBottomSheetVisible by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(
+                start = 16.dp,
+                end = 16.dp,
+                top = 8.dp
+            )
+            .height(120.dp)
+            .combinedClickable(
+                onLongClick = {
+                    isModalBottomSheetVisible = true
+                },
+                onClick = {}
+            ),
+        shape = RoundedCornerShape(32.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondary
+        )
+    ) {
+        Row(
+            modifier = modifier
+                .padding(16.dp)
+                .fillMaxSize()
+        ) {
+            Column(
+                modifier = modifier
+                    .weight(0.5f)
+                    .fillMaxSize()
+            ) {
+                Text(
+                    modifier = modifier
+                        .align(Alignment.Start),
+                    text = word.transcription,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+                Spacer(modifier = modifier.padding(20.dp))
+                IconToggleButton(
+                    modifier = modifier
+                        .size(24.dp),
+                    checked = toggleButtonChecked,
+                    onCheckedChange = { toggleButtonChecked = it }
+                ) {
+                    if (!toggleButtonChecked) {
+                        Icon(
+                            modifier = modifier
+                                .fillMaxSize(),
+                            imageVector = Icons.Default.FavoriteBorder,
+                            contentDescription = stringResource(R.string.favourite),
+                            tint = MaterialTheme.colorScheme.tertiary
+                        )
+                    } else {
+                        Icon(
+                            modifier = modifier
+                                .fillMaxSize(),
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = stringResource(R.string.favourite)
+                        )
+                    }
+                }
+            }
+            Column(
+                modifier = modifier
+                    .weight(0.5f)
+                    .fillMaxSize()
+            ) {
+                Text(
+                    modifier = modifier
+                        .align(Alignment.End),
+                    text = word.word,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.End,
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+                Spacer(modifier = modifier.padding(18.dp))
+                Text(
+                    modifier = modifier
+                        .align(Alignment.End),
+                    text = word.translation,
+                    textAlign = TextAlign.End,
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+            }
+        }
+    }
+    if (isModalBottomSheetVisible) {
+        CardModalBottomSheet(
+            onDismissRequest = { isModalBottomSheetVisible = false },
+            word = word,
+            viewModel = viewModel,
+            navController = navController
+        )
+    }
+}
+
+@Composable
 fun CollectionsGrid(
     modifier: Modifier = Modifier
 ) {
@@ -307,6 +484,8 @@ fun HomeFloatingActionButtonPreview() {
 @Composable
 fun BasicNavigationBarPreview() {
     OtzarIvritTheme {
-        BasicNavigationBar(NavController(MainActivity()))
+        BasicNavigationBar(
+            navController = NavController(MainActivity())
+        )
     }
 }

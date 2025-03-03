@@ -44,7 +44,7 @@ fun SettingsScreen(
             BasicTopAppBar(title = R.string.settings_title)
         },
         bottomBar = {
-            BasicNavigationBar(navController)
+            BasicNavigationBar(navController = navController)
         }
     ) { innerPadding ->
         Column(
