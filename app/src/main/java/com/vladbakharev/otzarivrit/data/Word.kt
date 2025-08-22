@@ -9,5 +9,6 @@ data class Word(
     val id: Int = 0,
     val word: String,
     val translation: String,
-    val transcription: String
+    val transcription: String,
+    val isFavourite: Boolean = false
 )

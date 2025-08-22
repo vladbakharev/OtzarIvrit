@@ -1,9 +1,7 @@
 package com.vladbakharev.otzarivrit.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -11,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.vladbakharev.otzarivrit.R
@@ -30,6 +27,7 @@ fun HomeScreen(
     val wordsList by viewModel.getAllWordsById().collectAsState(initial = emptyList())
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             BasicTopAppBar(title = R.string.home_title)
         },
@@ -39,12 +37,11 @@ fun HomeScreen(
         bottomBar = {
             BasicNavigationBar(navController = navController)
         }
-    ) { paddingValue ->
+    ) { innerPadding ->
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .padding(paddingValue)
-                .background(MaterialTheme.colorScheme.background)
+                .padding(innerPadding)
         ) {
             WordsList(
                 words = wordsList,
@@ -54,23 +51,3 @@ fun HomeScreen(
         }
     }
 }
-
-/*@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    val fakeWordDao = object : WordDao {}
-    val fakeWordsRepository = WordsRepository(
-        wordDao = fakeWordDao
-    )
-    val fakeViewModel = OtzarIvritViewModel(
-        wordsRepository = fakeWordsRepository
-    )
-    val navController = rememberNavController()
-
-    OtzarIvritTheme {
-        HomeScreen(
-            viewModel = fakeViewModel,
-            navController = navController
-        )
-    }
-}*/

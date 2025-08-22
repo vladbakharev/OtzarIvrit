@@ -20,19 +20,27 @@ class OtzarIvritViewModel(private val wordsRepository: WordsRepository) : ViewMo
                 Word(
                     word = word,
                     translation = translation,
-                    transcription = transcription
+                    transcription = transcription,
+                    isFavourite = false
                 )
             )
         }
 
-    fun updateWord(id: Int, word: String, translation: String, transcription: String) =
+    fun updateWord(
+        id: Int,
+        word: String,
+        translation: String,
+        transcription: String,
+        isFavourite: Boolean
+    ) =
         viewModelScope.launch {
             wordsRepository.updateWord(
                 Word(
                     id = id,
                     word = word,
                     translation = translation,
-                    transcription = transcription
+                    transcription = transcription,
+                    isFavourite = isFavourite
                 )
             )
         }
@@ -42,11 +50,16 @@ class OtzarIvritViewModel(private val wordsRepository: WordsRepository) : ViewMo
             wordsRepository.deleteWord(word)
         }
 
+    fun toggleFavourite(wordId: Int, isFavourite: Boolean) =
+        viewModelScope.launch {
+            wordsRepository.toggleFavourite(wordId, isFavourite)
+        }
+
     fun getWordById(id: Int): Flow<Word?> = wordsRepository.getWordById(id)
 
-    fun getAllWords(): Flow<List<Word>> = wordsRepository.getAllWordsStream()
-
     fun getAllWordsById(): Flow<List<Word>> = wordsRepository.getAllWordsById()
+
+    fun getFavouriteWords(): Flow<List<Word>> = wordsRepository.getFavouriteWords()
 
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {

@@ -7,8 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -32,15 +33,19 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconToggleButton
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -53,22 +58,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.vladbakharev.otzarivrit.MainActivity
 import com.vladbakharev.otzarivrit.R
+import com.vladbakharev.otzarivrit.data.AppTheme
+import com.vladbakharev.otzarivrit.data.SettingsViewModel
 import com.vladbakharev.otzarivrit.data.Word
 import com.vladbakharev.otzarivrit.navigation.NavBar
 import com.vladbakharev.otzarivrit.navigation.Screen
+import com.vladbakharev.otzarivrit.ui.theme.DefaultCornerShape
+import com.vladbakharev.otzarivrit.ui.theme.DefaultElevation
 import com.vladbakharev.otzarivrit.ui.theme.OtzarIvritTheme
 import com.vladbakharev.otzarivrit.ui.theme.White
+import com.vladbakharev.otzarivrit.ui.theme.notoSansHebrew
 import com.vladbakharev.otzarivrit.ui.viewmodel.OtzarIvritViewModel
 import kotlinx.coroutines.flow.map
 
@@ -79,12 +92,16 @@ fun BasicTopAppBar(
     title: Int
 ) {
     TopAppBar(
+        modifier = modifier,
         title = {
-            Text(stringResource(title))
+            Text(
+                text = stringResource(title),
+                style = MaterialTheme.typography.titleLarge
+            )
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.secondary
+            containerColor = colorScheme.primary,
+            titleContentColor = White
         )
     )
 }
@@ -93,8 +110,8 @@ fun BasicTopAppBar(
 fun HomeFloatingActionButton(navController: NavController) {
     FloatingActionButton(
         onClick = { navController.navigate(route = Screen.AddWord.route) },
-        containerColor = MaterialTheme.colorScheme.primary,
-        contentColor = MaterialTheme.colorScheme.secondary
+        containerColor = colorScheme.primary,
+        contentColor = White
     ) {
         Icon(Icons.Default.Add, contentDescription = stringResource(R.string.fab_add))
     }
@@ -111,7 +128,7 @@ fun BasicNavigationBar(
 
     val items = listOf(
         NavBar.Home,
-        NavBar.Collections,
+        NavBar.Favourites,
         NavBar.Settings
     )
 
@@ -124,11 +141,11 @@ fun BasicNavigationBar(
     }
 
     Surface(
-        shadowElevation = 16.dp,
-        color = White
+        shadowElevation = DefaultElevation,
+        color = colorScheme.secondary
     ) {
         NavigationBar(
-            containerColor = MaterialTheme.colorScheme.secondary
+            containerColor = colorScheme.secondary
         ) {
             items.forEachIndexed { index, item ->
 
@@ -160,11 +177,11 @@ fun BasicNavigationBar(
                     },
                     selected = selectedItem == index,
                     colors = NavigationBarItemDefaults.colors(
-                        indicatorColor = MaterialTheme.colorScheme.secondary,
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = MaterialTheme.colorScheme.tertiary,
-                        unselectedTextColor = MaterialTheme.colorScheme.tertiary
+                        indicatorColor = colorScheme.secondary,
+                        selectedIconColor = colorScheme.primary,
+                        selectedTextColor = colorScheme.primary,
+                        unselectedIconColor = colorScheme.tertiary,
+                        unselectedTextColor = colorScheme.tertiary
                     ),
                     onClick = {
                         selectedItem = index
@@ -184,6 +201,41 @@ fun BasicNavigationBar(
     }
 }
 
+@Composable
+fun WordTextField(
+    modifier: Modifier = Modifier,
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String
+) {
+    TextField(
+        modifier = modifier
+            .padding(16.dp)
+            .fillMaxWidth(),
+        value = value.trim(),
+        onValueChange = onValueChange,
+        placeholder = {
+            Text(
+                text = placeholder,
+                color = colorScheme.primary
+            )
+        },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions.Default.copy(
+            imeAction = ImeAction.Next
+        ),
+        shape = DefaultCornerShape,
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = White,
+            unfocusedContainerColor = White,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            focusedTextColor = colorScheme.primary,
+            unfocusedTextColor = colorScheme.primary
+        )
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardModalBottomSheet(
@@ -199,15 +251,15 @@ fun CardModalBottomSheet(
     ModalBottomSheet(
         modifier = modifier,
         sheetState = modalBottomSheetState,
-        onDismissRequest = { onDismissRequest() }
+        onDismissRequest = { onDismissRequest() },
+        containerColor = colorScheme.secondary,
+        contentColor = colorScheme.tertiary
     ) {
         Column {
             Row(
                 modifier = modifier
                     .fillMaxWidth()
-                    .clickable {
-                        isDeleteDialogVisible = true
-                    },
+                    .clickable { isDeleteDialogVisible = true },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start
             ) {
@@ -271,10 +323,8 @@ fun DeleteWordDialog(
     viewModel: OtzarIvritViewModel,
     word: Word
 ) {
-    var openDialog by remember { mutableStateOf(true) }
-
     BasicAlertDialog(
-        onDismissRequest = { openDialog = false },
+        onDismissRequest = onDismissRequest
     ) {
         Surface(
             modifier = modifier
@@ -282,7 +332,8 @@ fun DeleteWordDialog(
                 .wrapContentHeight()
                 .padding(16.dp),
             shape = RoundedCornerShape(28.dp),
-            tonalElevation = AlertDialogDefaults.TonalElevation
+            tonalElevation = AlertDialogDefaults.TonalElevation,
+            color = colorScheme.background
         ) {
             Column {
                 Text(
@@ -321,6 +372,108 @@ fun DeleteWordDialog(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ChooseThemeDialog(
+    modifier: Modifier = Modifier,
+    onDismissRequest: () -> Unit,
+    settingsViewModel: SettingsViewModel,
+    theme: AppTheme
+) {
+
+    val themeOptions = listOf(
+        "System Theme" to AppTheme.SYSTEM,
+        "Light Theme" to AppTheme.LIGHT,
+        "Dark Theme" to AppTheme.DARK
+    )
+
+    BasicAlertDialog(
+        onDismissRequest = onDismissRequest
+    ) {
+        Surface(
+            modifier = modifier
+                .wrapContentWidth()
+                .wrapContentHeight()
+                .padding(24.dp),
+            shape = RoundedCornerShape(28.dp),
+            tonalElevation = AlertDialogDefaults.TonalElevation,
+            color = colorScheme.secondary
+        ) {
+            Column {
+                Text(
+                    modifier = modifier
+                        .padding(top = 24.dp, start = 24.dp, end = 24.dp, bottom = 16.dp),
+                    text = stringResource(R.string.choose_theme),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = colorScheme.tertiary
+                )
+
+                themeOptions.forEach { (themeName, themeValue) ->
+                    Row(
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .padding(start = 24.dp, end = 24.dp, bottom = 12.dp)
+                            .clickable {
+                                settingsViewModel.updateTheme(themeValue)
+                                onDismissRequest()
+                            },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = themeName,
+                            color = colorScheme.tertiary,
+                            fontSize = 16.sp
+                        )
+                        RadioButton(
+                            selected = theme == themeValue,
+                            onClick = {
+                                settingsViewModel.updateTheme(themeValue)
+                                onDismissRequest()
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AboutDialog(
+    modifier: Modifier = Modifier,
+    onDismissRequest: () -> Unit
+) {
+    BasicAlertDialog(
+        onDismissRequest = onDismissRequest
+    ) {
+        Surface(
+            modifier = modifier
+                .wrapContentWidth()
+                .wrapContentHeight()
+                .padding(16.dp),
+            shape = RoundedCornerShape(28.dp),
+            tonalElevation = AlertDialogDefaults.TonalElevation,
+            color = colorScheme.background
+        ) {
+            Column {
+                Text(
+                    modifier = modifier
+                        .padding(top = 24.dp, start = 24.dp, end = 24.dp, bottom = 16.dp),
+                    text = stringResource(R.string.about),
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Text(
+                    modifier = modifier
+                        .padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
+                    text = stringResource(R.string.developer),
+                )
+            }
+        }
+    }
+}
+
 @Composable
 fun WordsList(
     words: List<Word>,
@@ -329,8 +482,9 @@ fun WordsList(
     navController: NavController
 ) {
     LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(16.dp)
     ) {
         items(words) { word ->
             WordCard(word = word, viewModel = viewModel, navController = navController)
@@ -346,17 +500,16 @@ fun WordCard(
     viewModel: OtzarIvritViewModel,
     navController: NavController
 ) {
-    var toggleButtonChecked by remember { mutableStateOf(false) }
     var isModalBottomSheetVisible by remember { mutableStateOf(false) }
+
+    val favouritesIconSize by animateFloatAsState(
+        targetValue = if (word.isFavourite) 1.2f else 1f,
+        animationSpec = tween(durationMillis = 300)
+    )
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(
-                start = 16.dp,
-                end = 16.dp,
-                top = 8.dp
-            )
             .height(120.dp)
             .combinedClickable(
                 onLongClick = {
@@ -364,10 +517,10 @@ fun WordCard(
                 },
                 onClick = {}
             ),
-        shape = RoundedCornerShape(32.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 16.dp),
+        shape = DefaultCornerShape,
+        elevation = CardDefaults.cardElevation(defaultElevation = DefaultElevation),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondary
+            containerColor = colorScheme.secondary
         )
     ) {
         Row(
@@ -378,61 +531,54 @@ fun WordCard(
             Column(
                 modifier = modifier
                     .weight(0.5f)
-                    .fillMaxSize()
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    modifier = modifier
-                        .align(Alignment.Start),
-                    text = word.transcription,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.tertiary
+                    modifier = modifier.align(Alignment.Start),
+                    text = "/${word.transcription}/",
+                    textAlign = TextAlign.Start,
+                    fontStyle = FontStyle.Italic,
+                    color = colorScheme.tertiary
                 )
-                Spacer(modifier = modifier.padding(20.dp))
-                IconToggleButton(
+                IconButton(
                     modifier = modifier
-                        .size(24.dp),
-                    checked = toggleButtonChecked,
-                    onCheckedChange = { toggleButtonChecked = it }
-                ) {
-                    if (!toggleButtonChecked) {
-                        Icon(
-                            modifier = modifier
-                                .fillMaxSize(),
-                            imageVector = Icons.Default.FavoriteBorder,
-                            contentDescription = stringResource(R.string.favourite),
-                            tint = MaterialTheme.colorScheme.tertiary
-                        )
-                    } else {
-                        Icon(
-                            modifier = modifier
-                                .fillMaxSize(),
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = stringResource(R.string.favourite)
-                        )
+                        .size(24.dp)
+                        .graphicsLayer(
+                            scaleX = favouritesIconSize,
+                            scaleY = favouritesIconSize
+                        ),
+                    onClick = {
+                        viewModel.toggleFavourite(word.id, !word.isFavourite)
                     }
+                ) {
+                    Icon(
+                        modifier = modifier.fillMaxSize(),
+                        imageVector = if (word.isFavourite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = stringResource(R.string.favourite),
+                        tint = if (word.isFavourite) colorScheme.primary else colorScheme.tertiary
+                    )
                 }
             }
             Column(
                 modifier = modifier
                     .weight(0.5f)
-                    .fillMaxSize()
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    modifier = modifier
-                        .align(Alignment.End),
+                    modifier = modifier.align(Alignment.End),
                     text = word.word,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = notoSansHebrew,
+                    fontSize = 24.sp,
                     textAlign = TextAlign.End,
-                    color = MaterialTheme.colorScheme.tertiary
+                    color = colorScheme.tertiary
                 )
-                Spacer(modifier = modifier.padding(18.dp))
                 Text(
-                    modifier = modifier
-                        .align(Alignment.End),
+                    modifier = modifier.align(Alignment.End),
                     text = word.translation,
                     textAlign = TextAlign.End,
-                    color = MaterialTheme.colorScheme.tertiary
+                    color = colorScheme.tertiary
                 )
             }
         }
@@ -445,21 +591,6 @@ fun WordCard(
             navController = navController
         )
     }
-}
-
-@Composable
-fun CollectionsGrid(
-    modifier: Modifier = Modifier
-) {
-    LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-    ) {
-//        items()
-
-
-    }
-
 }
 
 //PREVIEWS
